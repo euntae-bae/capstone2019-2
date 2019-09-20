@@ -1,1 +1,1 @@
-# capstone2019-2
+# capstone2019-2 YeogiSeo
