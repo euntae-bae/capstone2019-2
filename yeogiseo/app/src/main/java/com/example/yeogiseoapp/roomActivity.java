@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,6 +29,9 @@ public class roomActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String id = intent.getStringExtra("ID");
+        String room = intent.getStringExtra("room");
+        String info = intent.getStringExtra("info");
+        Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
