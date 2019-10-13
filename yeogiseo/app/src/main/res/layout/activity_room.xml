@@ -10,15 +10,17 @@
 
     <include
         layout="@layout/app_bar_drawer"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:background="#AAAAAA"/>
 
-    <include
-        layout="@layout/chat_square"
+    <fragment
         android:layout_width="match_parent"
         android:layout_height="240dp"
         android:gravity = "bottom"
-        android:layout_alignParentBottom = "true"/>
+        android:layout_alignParentBottom = "true"
+        tools:layout="@layout/chat_square"/>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
@@ -28,5 +30,14 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_drawer"
         app:menu="@menu/activity_drawer_drawer" />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="360dp"
+        android:gravity="bottom"
+        android:layout_alignParentBottom = "true"
+        >
+    </androidx.viewpager.widget.ViewPager>
 
 </androidx.drawerlayout.widget.DrawerLayout>
