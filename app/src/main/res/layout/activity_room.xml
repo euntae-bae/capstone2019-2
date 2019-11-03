@@ -15,10 +15,11 @@
         android:layout_height="match_parent"
         android:background="#AAAAAA"/>
 
-    <include
-        layout="@layout/chat_square"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
+    <fragment
+        android:name="com.example.yeogiseoapp.chatFragment"
+        android:id="@+id/chat_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:gravity = "bottom"
         android:layout_alignParentBottom = "true"/>
 

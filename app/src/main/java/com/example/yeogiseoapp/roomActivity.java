@@ -12,6 +12,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -25,6 +26,7 @@ import com.google.android.material.snackbar.Snackbar;
 public class roomActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     ViewPager pager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,15 @@ public class roomActivity extends AppCompatActivity {
         });
         pager.setAdapter(new pagerAdapter(getSupportFragmentManager()));
         pager.setCurrentItem(0);
+
+        /*
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        chatFragment fragment = new chatFragment();
+        fragmentTransaction.add(R.id.chat_content, fragment);
+        fragmentTransaction.commit();
+*/
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -79,7 +90,6 @@ public class roomActivity extends AppCompatActivity {
                     return null;
             }
         }
-
         @Override
         public int getCount() {
             // total page count
@@ -92,7 +102,6 @@ public class roomActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.drawer, menu);
         return true;
     }
-
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
