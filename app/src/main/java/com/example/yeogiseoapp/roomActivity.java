@@ -3,29 +3,19 @@ package com.example.yeogiseoapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.viewpager.widget.ViewPager;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
 public class roomActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
-    ViewPager pager;
 
 
     @Override
@@ -38,19 +28,8 @@ public class roomActivity extends AppCompatActivity {
         String room = intent.getStringExtra("room");
         String info = intent.getStringExtra("info");
         Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
-        pager = (ViewPager)findViewById(R.id.pager);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        pager.setAdapter(new pagerAdapter(getSupportFragmentManager()));
-        pager.setCurrentItem(0);
 
         /*
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -72,29 +51,6 @@ public class roomActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-    }
-    private class pagerAdapter extends FragmentStatePagerAdapter
-    {
-        public pagerAdapter(FragmentManager fm )
-        {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            switch(position)
-            {
-                case 0:
-                    return new mapFragment();
-                default:
-                    return null;
-            }
-        }
-        @Override
-        public int getCount() {
-            // total page count
-            return 1;
-        }
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
