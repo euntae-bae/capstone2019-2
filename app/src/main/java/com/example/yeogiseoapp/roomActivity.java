@@ -16,7 +16,7 @@ import com.google.android.material.navigation.NavigationView;
 
 public class roomActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
-
+    String id, room, info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,9 +24,11 @@ public class roomActivity extends AppCompatActivity {
         setContentView(R.layout.activity_room);
 
         Intent intent = getIntent();
-        String id = intent.getStringExtra("ID");
-        String room = intent.getStringExtra("room");
-        String info = intent.getStringExtra("info");
+        id = intent.getStringExtra("id");
+        chatFragment cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
+        cf.initChat();
+        room = intent.getStringExtra("room");
+        info = intent.getStringExtra("info");
         Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,5 +65,9 @@ public class roomActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
+    }
+
+    public String getEmail(){
+        return id;
     }
 }

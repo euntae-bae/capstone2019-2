@@ -1,18 +1,24 @@
 package com.example.yeogiseoapp;
 
+import android.os.Debug;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.w3c.dom.Text;
 
+import java.util.List;
+
 public class chatAdapter extends RecyclerView.Adapter<chatAdapter.MyViewHolder> {
-    private String[] mDataset;
+    private List<chat> mChat;
+    private String email;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -27,17 +33,20 @@ public class chatAdapter extends RecyclerView.Adapter<chatAdapter.MyViewHolder> 
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public chatAdapter(String[] myDataset) {
-        mDataset = myDataset;
+    public chatAdapter(List<chat> mc, String em) {
+        mChat = mc;
+        email = em;
     }
 
     // Create new views (invoked by the layout manager)
     @Override
     public chatAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
                                                      int viewType) {
-        // create a new view
-        View v = LayoutInflater.from(parent.getContext())
+        View v;
+        // create a new
+        v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.my_chat_view, parent, false);
+
         MyViewHolder vh = new MyViewHolder(v);
         return vh;
     }
@@ -47,13 +56,13 @@ public class chatAdapter extends RecyclerView.Adapter<chatAdapter.MyViewHolder> 
     public void onBindViewHolder(MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.textView.setText(mDataset[position]);
+        holder.textView.setText(mChat.get(position).email + " : "+mChat.get(position).text);
 
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mDataset.length;
+        return mChat.size();
     }
 }

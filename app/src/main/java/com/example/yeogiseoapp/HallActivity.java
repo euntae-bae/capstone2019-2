@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class HallActivity extends AppCompatActivity {
 
     Context context;
     RoomAdapter adapter;
+    String sid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +32,7 @@ public class HallActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
-
+        sid = getIntent().getStringExtra("id");
         ListView listview;
 
         adapter = new RoomAdapter();
@@ -50,6 +52,8 @@ public class HallActivity extends AppCompatActivity {
                 String info = item.getInfo();
 
                 Intent intent = new Intent(HallActivity.this, roomActivity.class);
+                intent.putExtra("id", sid);
+
                 intent.putExtra("room", room);
                 intent.putExtra("info", info);
                 startActivity(intent);
