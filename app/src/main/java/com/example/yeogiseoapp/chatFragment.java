@@ -62,6 +62,12 @@ public class chatFragment extends Fragment {
         chat c2 = new chat("aa", "너두 안녕??");
         l.add(c1);
         l.add(c2);
+    }
 
+    public void sendStr(String name, String txt)
+    {
+        chat c = new chat(name, txt);
+        l.add(c);
+        mAdapter.notifyItemInserted(l.size() -1);
     }
 }
