@@ -42,4 +42,10 @@
         android:layout_marginTop="24dp"
         android:text="@string/action_register"
         />
+    <Button
+        android:id="@+id/btnPrev"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="이전으로"
+        />
 </LinearLayout>

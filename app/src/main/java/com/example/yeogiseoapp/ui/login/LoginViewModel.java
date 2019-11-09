@@ -1,15 +1,15 @@
 package com.example.yeogiseoapp.ui.login;
 
+import android.util.Patterns;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.util.Patterns;
-
+import com.example.yeogiseoapp.R;
 import com.example.yeogiseoapp.data.LoginRepository;
 import com.example.yeogiseoapp.data.Result;
 import com.example.yeogiseoapp.data.model.LoggedInUser;
-import com.example.yeogiseoapp.R;
 
 public class LoginViewModel extends ViewModel {
 
