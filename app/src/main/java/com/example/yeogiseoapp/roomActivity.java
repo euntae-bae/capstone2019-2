@@ -20,6 +20,8 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import com.google.android.gms.maps.MapFragment;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.IOException;
@@ -31,6 +33,8 @@ public class roomActivity extends AppCompatActivity {
     String id, room, info;
     private static final int REQUEST_CODE = 200;
     ArrayList<Uri> uris = new ArrayList<Uri>();
+    chatFragment cf;
+    mapFragment mf;
 
 
     @Override
@@ -39,7 +43,9 @@ public class roomActivity extends AppCompatActivity {
         setContentView(R.layout.activity_room);
         Intent intent = getIntent();
         id = intent.getStringExtra("id");
-        chatFragment cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
+        cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
+        mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
+
         cf.initChat();
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
@@ -119,7 +125,10 @@ public class roomActivity extends AppCompatActivity {
             try {
                 in = getContentResolver().openInputStream(uri);
                 chatFragment tf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
-                tf.sendStr("sj", getExifInfo(in));
+                String[] exInfo = getExifInfo(in);
+
+                tf.sendStr("sj", exInfo[0] + '\n' + exInfo[1] + '\n' + exInfo[2]);
+                mf.makeMarker(Float.valueOf(exInfo[1]), Float.valueOf(exInfo[2]));
                 // Now you can extract any Exif tag you want
                 // Assuming the image is a JPEG or supported raw format
             } catch (IOException e) {
@@ -128,10 +137,10 @@ public class roomActivity extends AppCompatActivity {
         }
     }
 
-    public String getExifInfo(InputStream filepath)
+    public String[] getExifInfo(InputStream filepath)
     {
         ExifInterface exif = null;
-        String attr = "";
+        String[] attr = {"", "", ""};
         try
         {
             exif = new ExifInterface(filepath);
@@ -143,11 +152,39 @@ public class roomActivity extends AppCompatActivity {
         }
         if (exif != null)
         {
-            attr += String.valueOf(exif.getAttribute(ExifInterface.TAG_DATETIME));
-            attr += String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
-            attr += String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+            attr[0] = String.valueOf(exif.getAttribute(ExifInterface.TAG_DATETIME));
+            attr[1] = String.valueOf(convertToDegree(String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE))));
+            attr[2] = String.valueOf(convertToDegree(String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE))));
 
         }
         return attr;
     }
+
+
+
+    private Float convertToDegree(String stringDMS){
+        Float result = null;
+        String[] DMS = stringDMS.split(",", 3);
+
+        String[] stringD = DMS[0].split("/", 2);
+        Double D0 = new Double(stringD[0]);
+        Double D1 = new Double(stringD[1]);
+        Double FloatD = D0/D1;
+
+        String[] stringM = DMS[1].split("/", 2);
+        Double M0 = new Double(stringM[0]);
+        Double M1 = new Double(stringM[1]);
+        Double FloatM = M0/M1;
+
+        String[] stringS = DMS[2].split("/", 2);
+        Double S0 = new Double(stringS[0]);
+        Double S1 = new Double(stringS[1]);
+        Double FloatS = S0/S1;
+
+        result = new Float(FloatD + (FloatM/60) + (FloatS/3600));
+
+        return result;
+
+
+    };
 }

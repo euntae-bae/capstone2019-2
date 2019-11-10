@@ -12,13 +12,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 
 public class chatFragment extends Fragment {
@@ -27,12 +35,50 @@ public class chatFragment extends Fragment {
     chatAdapter mAdapter;
     String em;
     List<chat> l = new ArrayList<>();
+    Button sendBtn;
+    EditText editText;
+
+    private String TAG = "ChatFragment";
+    private Socket mSocket;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
+        em = ((roomActivity)getActivity()).getEmail();
+        sendBtn = (Button)v.findViewById(R.id.sendbtn);
+        editText = (EditText)v.findViewById(R.id.message);
+        try {
+            mSocket = IO.socket("http://ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com:8806");
+        } catch(URISyntaxException e) {
+            e.printStackTrace();
+        }
+        mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                mSocket.emit("message_from_client", "Hi~ 나는 안드얌");
+            }
+        }).on("message_from_server", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                getActivity().runOnUiThread(new Runnable(){
+                    @Override
+                    public void run() {
+                        sendStr(em, args[0].toString());
+                    }
+                });
+            }
+        });
+        mSocket.connect();
+
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String msg = editText.getText().toString();
+                mSocket.emit("message_from_client", msg);
+            }
+        });
         return v;
     }
 
@@ -69,5 +115,6 @@ public class chatFragment extends Fragment {
         chat c = new chat(name, txt);
         l.add(c);
         mAdapter.notifyItemInserted(l.size() -1);
+        recyclerView.scrollToPosition(l.size()-1);
     }
 }

@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class mapFragment extends Fragment
         implements OnMapReadyCallback {
     private MapView mapView = null;
+    private GoogleMap mMap;
 
     public mapFragment()
     {
@@ -98,6 +99,7 @@ public class mapFragment extends Fragment
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
         LatLng SEOUL = new LatLng(37.56, 126.97);
 
         MarkerOptions markerOptions = new MarkerOptions();
@@ -115,4 +117,21 @@ public class mapFragment extends Fragment
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
     }
 
+    public void makeMarker(float latitude, float longitude)
+    {
+        LatLng pic = new LatLng(latitude, longitude);
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        markerOptions.position(pic);
+
+        markerOptions.title("원한 곳");
+
+        markerOptions.snippet("무슨 사진일까?");
+
+        mMap.addMarker(markerOptions);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(pic));
+
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+    }
 }
