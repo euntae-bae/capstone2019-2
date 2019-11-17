@@ -49,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+
                 startActivity(intent);
             }
         });
@@ -192,6 +193,7 @@ public class LoginActivity extends AppCompatActivity {
                 LoginResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
                 int code = result.getCode();
                 String message = result.getMessage();
+                String username = result.getUsername();
                 Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
                 if (code == 201) {
                     // 로그인 성공
@@ -201,6 +203,7 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor = sp.edit();
                     editor.putString("loggedinEmail", data.getEmail());
                     editor.putString("loggedinPassword", data.getPassword());
+                    editor.putString("loggedinNickname", username);
                     editor.commit();
                     Log.d("login succeed", "email: " + data.getEmail() + "/password: " + data.getPassword());
 

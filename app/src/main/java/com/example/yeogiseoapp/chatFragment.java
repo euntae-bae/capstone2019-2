@@ -33,7 +33,7 @@ public class chatFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
     chatAdapter mAdapter;
-    String em;
+    String name;
     List<chat> l = new ArrayList<>();
     Button sendBtn;
     EditText editText;
@@ -46,7 +46,7 @@ public class chatFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
-        em = ((roomActivity)getActivity()).getEmail();
+        name = ((roomActivity)getActivity()).getName();
         sendBtn = (Button)v.findViewById(R.id.sendbtn);
         editText = (EditText)v.findViewById(R.id.message);
         try {
@@ -57,7 +57,7 @@ public class chatFragment extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                mSocket.emit("message_from_client", "Hi~ 나는 안드얌");
+                mSocket.emit("message_from_client", "Server Connected");
             }
         }).on("message_from_server", new Emitter.Listener() {
             @Override
@@ -65,7 +65,7 @@ public class chatFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable(){
                     @Override
                     public void run() {
-                        sendStr(em, args[0].toString());
+                        sendStr(name, args[0].toString());
                     }
                 });
             }
@@ -83,7 +83,6 @@ public class chatFragment extends Fragment {
     }
 
     public void initChat() {
-        initData();
         recyclerView = (RecyclerView)getView().findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -94,20 +93,13 @@ public class chatFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
-        em = ((roomActivity)getActivity()).getEmail();
+        name = ((roomActivity)getActivity()).getName();
 
         // specify an adapter (see also next example)
-        mAdapter = new chatAdapter(l, em);
+        mAdapter = new chatAdapter(l, name);
         recyclerView.setAdapter(mAdapter);
 
         mAdapter.notifyItemInserted(l.size() -1);
-    }
-
-    public void initData() {
-        chat c1 = new chat("tlawjd99@naver.com", "안녕??");
-        chat c2 = new chat("aa", "너두 안녕??");
-        l.add(c1);
-        l.add(c2);
     }
 
     public void sendStr(String name, String txt)
@@ -116,5 +108,6 @@ public class chatFragment extends Fragment {
         l.add(c);
         mAdapter.notifyItemInserted(l.size() -1);
         recyclerView.scrollToPosition(l.size()-1);
+        editText.setText("");
     }
 }

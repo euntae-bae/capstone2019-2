@@ -21,12 +21,12 @@ public class StartupActivity extends Activity {
         sp = getSharedPreferences("loggedinData", MODE_PRIVATE);
         String email = sp.getString("loggedinEmail", null);
         String password = sp.getString("loggedinPassword", null);
+        String nickname = sp.getString("loggedinNickname", null);
         Log.i("autologin", "email: " + email + "/password: " + password);
 
         Intent intent = null;
-        if (email == null || password == null) {
+        if (email == null || password == null || nickname == null) {
             Log.i("autologin", "failed");
-
             intent = new Intent(getApplicationContext(), LoginActivity.class);
         }
         else {

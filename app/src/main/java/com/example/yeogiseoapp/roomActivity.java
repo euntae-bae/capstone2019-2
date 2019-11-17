@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class roomActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
-    String id, room, info;
+    String id, room, info, name;
     private static final int REQUEST_CODE = 200;
     ArrayList<Uri> uris = new ArrayList<Uri>();
     chatFragment cf;
@@ -43,6 +43,7 @@ public class roomActivity extends AppCompatActivity {
         setContentView(R.layout.activity_room);
         Intent intent = getIntent();
         id = intent.getStringExtra("id");
+        name = intent.getStringExtra("nickname");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
 
@@ -98,6 +99,9 @@ public class roomActivity extends AppCompatActivity {
 
     public String getEmail(){
         return id;
+    }
+    public String getName(){
+        return name;
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {

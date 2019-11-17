@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/changed_travel_img"
     android:paddingHorizontal="24dp"
     >
     <TextView
@@ -13,39 +14,64 @@
         />
     <EditText
         android:id="@+id/edtTextEmail"
-        android:inputType="textEmailAddress"
+        android:background="@drawable/inputdraw"
+        android:inputType="textMultiLine|textNoSuggestions|textEmailAddress"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:padding="@dimen/editText_inner_padding"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         android:hint="Email"
         />
     <EditText
         android:id="@+id/edtTextUsername"
+        android:background="@drawable/inputdraw"
+        android:inputType="textMultiLine|textNoSuggestions"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="User Name"
+        android:padding="@dimen/editText_inner_padding"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         />
     <EditText
         android:id="@+id/edtTextPass"
-        android:inputType="textPassword"
+        android:background="@drawable/inputdraw"
+        android:inputType="textMultiLine|textNoSuggestions|textPassword"
         android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Password"
+        android:padding="@dimen/editText_inner_padding"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         />
     <Button
         android:id="@+id/btnRegister"
+        android:background="@drawable/loginbtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         android:text="@string/action_register"
+        android:textColor="@color/colorBabyblue"
+
         />
     <Button
         android:id="@+id/btnPrev"
+        android:background="@drawable/loginbtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="이전으로"
+        android:textColor="@color/colorBabyblue"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         />
 </LinearLayout>
