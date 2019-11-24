@@ -2,6 +2,9 @@ package com.example.yeogiseoapp;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +14,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 
 public class mapFragment extends Fragment
         implements OnMapReadyCallback {
     private MapView mapView = null;
     private GoogleMap mMap;
+    ArrayList<Polyline> polylines = new ArrayList<Polyline>();
+    ArrayList<LatLng> markers = new ArrayList<LatLng>();
 
     public mapFragment()
     {
@@ -100,38 +111,49 @@ public class mapFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng SEOUL = new LatLng(37.56, 126.97);
+        LatLng INHA = new LatLng(37.450606, 126.657225);
 
         MarkerOptions markerOptions = new MarkerOptions();
 
-        markerOptions.position(SEOUL);
+        markerOptions.position(INHA);
 
-        markerOptions.title("서울");
+        markerOptions.title("인하대");
 
-        markerOptions.snippet("수도");
+        markerOptions.snippet("하이테크");
 
         googleMap.addMarker(markerOptions);
 
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(SEOUL));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(INHA));
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
     }
 
-    public void makeMarker(float latitude, float longitude)
+    public void makeMarker(float latitude, float longitude, Bitmap img)
     {
         LatLng pic = new LatLng(latitude, longitude);
         MarkerOptions markerOptions = new MarkerOptions();
 
         markerOptions.position(pic);
 
-        markerOptions.title("원한 곳");
+        markerOptions.title("제목");
 
         markerOptions.snippet("무슨 사진일까?");
+
+        if(img != null)
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(img));
 
         mMap.addMarker(markerOptions);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(pic));
 
         mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+
+        markers.add(pic);
+    }
+
+    public void drawPath(LatLng start, LatLng end){        //polyline을 그려주는 메소드
+        PolylineOptions options = new PolylineOptions().add(start).add(end).width(15).color(Color.BLACK).geodesic(true);
+        polylines.add(mMap.addPolyline(options));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
     }
 }

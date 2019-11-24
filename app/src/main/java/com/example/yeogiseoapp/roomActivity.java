@@ -1,16 +1,21 @@
 package com.example.yeogiseoapp;
 
+import android.app.Activity;
 import android.content.ClipData;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.renderscript.ScriptGroup;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.database.Cursor;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,20 +26,23 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class roomActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     String id, room, info, name;
     private static final int REQUEST_CODE = 200;
-    ArrayList<Uri> uris = new ArrayList<Uri>();
+    ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
     mapFragment mf;
+    ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
 
 
     @Override
@@ -105,46 +113,69 @@ public class roomActivity extends AppCompatActivity {
     }
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+        if (requestCode == REQUEST_CODE) {
 
             ClipData clipData = data.getClipData();
             Uri uri = data.getData();
+            PhotoInfo temp = new PhotoInfo();
             if(clipData != null) {
                 for (int i = 0; i < clipData.getItemCount(); i++) {
-                    uris.add(clipData.getItemAt(i).getUri());
+                    photoInfoList.add(new PhotoInfo(clipData.getItemAt(i).getUri()));
                 }
-            }else if(uri != null)
-                uris.add(uri);
+            }else if(uri != null) {
+                photoInfoList.add(new PhotoInfo(uri));
+            }
 
-
-            /*
-            String[] filePathColumn = {MediaStore.Images.Media.DATA};
-            Cursor cursor = getContentResolver().query(uris.get(0), filePathColumn, null, null, null);
-            cursor.moveToFirst();
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            cursor.close();
-            */
-
-            InputStream in;
+            InputStream in = null;
+            String imgpath = "";
             try {
-                in = getContentResolver().openInputStream(uri);
-                chatFragment tf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
-                String[] exInfo = getExifInfo(in);
+                for(int i=0; i<photoInfoList.size(); i++){
+                    in = getContentResolver().openInputStream(photoInfoList.get(i).uri);
+                    temp = getExifInfo(in);
+                    photoInfoList.get(i).time = temp.time;
+                    photoInfoList.get(i).longitude = temp.longitude;
+                    photoInfoList.get(i).latitude = temp.latitude;
+                }
+                photoInfoList.sort(new Comparator<PhotoInfo>() {
+                    @Override
+                    public int compare(PhotoInfo arg0, PhotoInfo arg1) {
+                        // TODO Auto-generated method stub
+                        long t0 = arg0.time;
+                        long t1 = arg1.time;
+                        if (t0 == t1)
+                            return 0;
+                        else if (t0 > t1)
+                            return 1;
+                        else
+                            return -1;
+                    }
+                });
 
-                tf.sendStr("sj", exInfo[0] + '\n' + exInfo[1] + '\n' + exInfo[2]);
-                mf.makeMarker(Float.valueOf(exInfo[1]), Float.valueOf(exInfo[2]));
-                // Now you can extract any Exif tag you want
-                // Assuming the image is a JPEG or supported raw format
+                Bitmap src;
+                for(int i=0; i<photoInfoList.size(); i++){
+                    cf.sendStr(name, String.valueOf(photoInfoList.get(i).time) + '\n'
+                            + String.valueOf(photoInfoList.get(i).latitude) + '\n'
+                            + String.valueOf(photoInfoList.get(i).longitude));
+
+                    src = decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 200, 100);
+                    smallPics.add(src);
+                    if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
+                        mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, src);
+
+                    if(i != photoInfoList.size()-1)
+                        mf.drawPath(new LatLng(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude), new LatLng(photoInfoList.get(i+1).latitude, photoInfoList.get(i+1).longitude));
+                }
             } catch (IOException e) {
                 // Handle any errors
             }
         }
     }
 
-    public String[] getExifInfo(InputStream filepath)
+    public PhotoInfo getExifInfo(InputStream filepath)
     {
         ExifInterface exif = null;
-        String[] attr = {"", "", ""};
+        Uri u = null;
+        PhotoInfo attr = new PhotoInfo();
         try
         {
             exif = new ExifInterface(filepath);
@@ -156,39 +187,95 @@ public class roomActivity extends AppCompatActivity {
         }
         if (exif != null)
         {
-            attr[0] = String.valueOf(exif.getAttribute(ExifInterface.TAG_DATETIME));
-            attr[1] = String.valueOf(convertToDegree(String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE))));
-            attr[2] = String.valueOf(convertToDegree(String.valueOf(exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE))));
-
+            attr.setInfo(u, exif.getAttribute(ExifInterface.TAG_DATETIME),
+                         exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE),
+                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
         }
         return attr;
     }
 
+    public String getRealPathFromURI(Uri contentURI, Activity context) {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        @SuppressWarnings("deprecation")
+        Cursor cursor = context.managedQuery(contentURI, projection, null,
+                null, null);
+        if (cursor == null)
+            return null;
+        int column_index = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        if (cursor.moveToFirst()) {
+            String s = cursor.getString(column_index);
+            // cursor.close();
+            return s;
+        }
+        // cursor.close();
+        return null;
+    }
 
+    private int exifOrientationToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
+    }
 
-    private Float convertToDegree(String stringDMS){
-        Float result = null;
-        String[] DMS = stringDMS.split(",", 3);
+    private static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
 
-        String[] stringD = DMS[0].split("/", 2);
-        Double D0 = new Double(stringD[0]);
-        Double D1 = new Double(stringD[1]);
-        Double FloatD = D0/D1;
+        if (height > reqHeight || width > reqWidth) {
 
-        String[] stringM = DMS[1].split("/", 2);
-        Double M0 = new Double(stringM[0]);
-        Double M1 = new Double(stringM[1]);
-        Double FloatM = M0/M1;
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
 
-        String[] stringS = DMS[2].split("/", 2);
-        Double S0 = new Double(stringS[0]);
-        Double S1 = new Double(stringS[1]);
-        Double FloatS = S0/S1;
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) >= reqHeight
+                    && (halfWidth / inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
 
-        result = new Float(FloatD + (FloatM/60) + (FloatS/3600));
+        return inSampleSize;
+    }
 
-        return result;
+    public static Bitmap decodeSampledBitmapFromUri(Context context, Uri imageUri, int reqWidth, int reqHeight) throws FileNotFoundException {
+        Bitmap bitmap = null;
+        try {
+            // Get input stream of the image
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            InputStream iStream = context.getContentResolver().openInputStream(imageUri);
 
+            // First decode with inJustDecodeBounds=true to check dimensions
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(iStream, null, options);
+            if (iStream != null) {
+                iStream.close();
+            }
+            iStream = context.getContentResolver().openInputStream(imageUri);
 
-    };
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+            bitmap = BitmapFactory.decodeStream(iStream, null, options);
+            if (iStream != null) {
+                iStream.close();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
 }
