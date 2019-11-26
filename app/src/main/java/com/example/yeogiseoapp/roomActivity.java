@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -148,6 +149,7 @@ public class roomActivity extends AppCompatActivity
                     photoInfoList.get(i).time = temp.time;
                     photoInfoList.get(i).longitude = temp.longitude;
                     photoInfoList.get(i).latitude = temp.latitude;
+                    photoInfoList.get(i).orientation = temp.orientation;
                     if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
                         photoInfoList.remove(photoInfoList.get(i));
                         continue;
@@ -170,12 +172,14 @@ public class roomActivity extends AppCompatActivity
 
                 Bitmap src;
                 Drawable drawable;
+                navigationView.getMenu().clear();
                 for(int i=0; i<photoInfoList.size(); i++){
                     cf.sendStr(name, String.valueOf(photoInfoList.get(i).time) + '\n'
                             + String.valueOf(photoInfoList.get(i).latitude) + '\n'
                             + String.valueOf(photoInfoList.get(i).longitude));
 
-                    src = decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 150, 75);
+                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 120, 60), photoInfoList.get(i).orientation);
+
                     smallPics.add(src);
 
                     drawable = new BitmapDrawable(this.getResources(), src);
@@ -209,7 +213,8 @@ public class roomActivity extends AppCompatActivity
         {
             attr.setInfo(u, exif.getAttribute(ExifInterface.TAG_DATETIME),
                          exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE),
-                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+                         exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE),
+                         exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED));
         }
         return attr;
     }
@@ -230,17 +235,6 @@ public class roomActivity extends AppCompatActivity
         }
         // cursor.close();
         return null;
-    }
-
-    private int exifOrientationToDegrees(int exifOrientation) {
-        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-            return 90;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-            return 180;
-        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-            return 270;
-        }
-        return 0;
     }
 
     private static int calculateInSampleSize(
@@ -309,12 +303,56 @@ public class roomActivity extends AppCompatActivity
         }
 
         n = Integer.parseInt(temp);
-        cf.sendStr("mmola", temp);
         mf.moveCamera(mf.markers.get(n-1));
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
         return true;
+    }
+
+    public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_NORMAL:
+                return bitmap;
+            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
+                matrix.setScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.setRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
+                matrix.setRotate(180);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_TRANSPOSE:
+                matrix.setRotate(90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.setRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_TRANSVERSE:
+                matrix.setRotate(-90);
+                matrix.postScale(-1, 1);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.setRotate(-90);
+                break;
+            default:
+                return bitmap;
+        }
+        try {
+            Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return bmRotated;
+        }
+        catch (OutOfMemoryError e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

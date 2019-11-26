@@ -153,6 +153,7 @@ public class mapFragment extends Fragment
 
     public void drawPath(){        //polyline을 그려주는 메소드
         LatLng start, end;
+        removeLines();
         for(int i = 1; i<markers.size(); i++) {
             start = markers.get(i-1);
             end = markers.get(i);
@@ -160,6 +161,12 @@ public class mapFragment extends Fragment
             polylines.add(mMap.addPolyline(options));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
         }
+    }
+
+    public void removeLines(){
+        for(Polyline line : polylines)
+            line.remove();
+        polylines.clear();
     }
 
     public void moveCamera(LatLng dest){

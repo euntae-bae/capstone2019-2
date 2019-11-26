@@ -1,5 +1,8 @@
 package com.example.yeogiseoapp;
 
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -9,12 +12,14 @@ public class PhotoInfo {
     long time;
     float latitude;
     float longitude;
+    int orientation;
 
     PhotoInfo(){
         uri = null;
         time = -1;
         latitude = -1;
         longitude = -1;
+        orientation = 0;
     }
 
     PhotoInfo(Uri u){
@@ -22,6 +27,7 @@ public class PhotoInfo {
         time = -1;
         latitude = -1;
         longitude = -1;
+        orientation = 0;
     }
     PhotoInfo(Uri u, long t, float la, float lo){
         uri = u;
@@ -36,18 +42,20 @@ public class PhotoInfo {
         latitude = convertToDegree(la);
         longitude = convertToDegree(lo);
     }
-    public void setInfo(Uri u, long t, float la, float lo){
+    public void setInfo(Uri u, long t, float la, float lo, int or){
         uri = u;
         time = t;
         latitude = la;
         longitude = lo;
+        orientation = or;
     }
 
-    public void setInfo(Uri u, String t, String la, String lo){
+    public void setInfo(Uri u, String t, String la, String lo, int or){
         uri = u;
         time = convertToTime(t);
         latitude = convertToDegree(la);
         longitude = convertToDegree(lo);
+        orientation = or;
     }
 
     public void setUri(Uri u){
@@ -74,6 +82,9 @@ public class PhotoInfo {
     public void setLongitude(String l){
         longitude = convertToDegree(l);
     }
+
+    public void setOrientation(int or) { orientation = or; }
+    public int getOrientation() { return orientation; }
 
     private float convertToDegree(String stringDMS){
         float result;
@@ -114,4 +125,6 @@ public class PhotoInfo {
 
         return result;
     };
+
+
 }
