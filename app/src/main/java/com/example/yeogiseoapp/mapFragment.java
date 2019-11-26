@@ -151,9 +151,21 @@ public class mapFragment extends Fragment
         markers.add(pic);
     }
 
-    public void drawPath(LatLng start, LatLng end){        //polyline을 그려주는 메소드
-        PolylineOptions options = new PolylineOptions().add(start).add(end).width(15).color(Color.BLACK).geodesic(true);
-        polylines.add(mMap.addPolyline(options));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+    public void drawPath(){        //polyline을 그려주는 메소드
+        LatLng start, end;
+        for(int i = 1; i<markers.size(); i++) {
+            start = markers.get(i-1);
+            end = markers.get(i);
+            PolylineOptions options = new PolylineOptions().add(start).add(end).width(15).color(Color.BLACK).geodesic(true);
+            polylines.add(mMap.addPolyline(options));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+        }
+    }
+
+    public void moveCamera(LatLng dest){
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(dest));
+
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+
     }
 }

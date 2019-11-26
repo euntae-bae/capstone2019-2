@@ -7,19 +7,26 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ActionProvider;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -35,7 +42,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class roomActivity extends AppCompatActivity {
+public class roomActivity extends AppCompatActivity
+    implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
     String id, room, info, name;
     private static final int REQUEST_CODE = 200;
@@ -43,6 +51,7 @@ public class roomActivity extends AppCompatActivity {
     chatFragment cf;
     mapFragment mf;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
+    NavigationView navigationView;
 
 
     @Override
@@ -63,7 +72,8 @@ public class roomActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -74,6 +84,9 @@ public class roomActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+        navigationView.setNavigationItemSelectedListener(this);
+
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,6 +148,10 @@ public class roomActivity extends AppCompatActivity {
                     photoInfoList.get(i).time = temp.time;
                     photoInfoList.get(i).longitude = temp.longitude;
                     photoInfoList.get(i).latitude = temp.latitude;
+                    if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
+                        photoInfoList.remove(photoInfoList.get(i));
+                        continue;
+                    }
                 }
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
                     @Override
@@ -152,19 +169,22 @@ public class roomActivity extends AppCompatActivity {
                 });
 
                 Bitmap src;
+                Drawable drawable;
                 for(int i=0; i<photoInfoList.size(); i++){
                     cf.sendStr(name, String.valueOf(photoInfoList.get(i).time) + '\n'
                             + String.valueOf(photoInfoList.get(i).latitude) + '\n'
                             + String.valueOf(photoInfoList.get(i).longitude));
 
-                    src = decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 200, 100);
+                    src = decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 150, 75);
                     smallPics.add(src);
+
+                    drawable = new BitmapDrawable(this.getResources(), src);
+                    navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
+
                     if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
                         mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, src);
-
-                    if(i != photoInfoList.size()-1)
-                        mf.drawPath(new LatLng(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude), new LatLng(photoInfoList.get(i+1).latitude, photoInfoList.get(i+1).longitude));
                 }
+                mf.drawPath();
             } catch (IOException e) {
                 // Handle any errors
             }
@@ -276,6 +296,25 @@ public class roomActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return bitmap;
+    }
+
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        String id = String.valueOf(item.getTitle());
+        String temp = "";
+        int n = 0;
+
+        for(int i=7; i<id.length(); i++){
+            temp += id.charAt(i);
+        }
+
+        n = Integer.parseInt(temp);
+        cf.sendStr("mmola", temp);
+        mf.moveCamera(mf.markers.get(n-1));
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
 }

@@ -57,7 +57,7 @@ public class chatFragment extends Fragment {
         mSocket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                mSocket.emit("message_from_client", "Server Connected");
+                //mSocket.emit("message_from_client", "Server Connected");
             }
         }).on("message_from_server", new Emitter.Listener() {
             @Override
@@ -65,18 +65,19 @@ public class chatFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable(){
                     @Override
                     public void run() {
-                        sendStr(name, args[0].toString());
+                        sendStr(args[0].toString(), args[1].toString());
                     }
                 });
             }
         });
+
         mSocket.connect();
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String msg = editText.getText().toString();
-                mSocket.emit("message_from_client", msg);
+                mSocket.emit("message_from_client", name, msg);
             }
         });
         return v;

@@ -31,6 +31,7 @@
         android:layout_height="wrap_content"
         />
 
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -41,7 +42,6 @@
         app:menu="@menu/activity_drawer_drawer" >
 
     </com.google.android.material.navigation.NavigationView>
-
 
 
 </androidx.drawerlayout.widget.DrawerLayout>
