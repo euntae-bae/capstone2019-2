@@ -62,7 +62,6 @@ public class HallActivity extends AppCompatActivity {
                 Intent intent = new Intent(HallActivity.this, roomActivity.class);
                 intent.putExtra("id", sid);
                 intent.putExtra("nickname", snickname);
-
                 intent.putExtra("room", room);
                 intent.putExtra("info", info);
                 startActivity(intent);

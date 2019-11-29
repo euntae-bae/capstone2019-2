@@ -46,7 +46,7 @@ import java.util.Comparator;
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
-    String id, room, info, name;
+    String id, info, name, room;
     private static final int REQUEST_CODE = 200;
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
@@ -64,10 +64,11 @@ public class roomActivity extends AppCompatActivity
         name = intent.getStringExtra("nickname");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
-
-        cf.initChat();
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
+
+        cf.initChat();
+
         Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -125,6 +126,7 @@ public class roomActivity extends AppCompatActivity
     public String getName(){
         return name;
     }
+    public String getRoom() { return room; }
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == REQUEST_CODE) {

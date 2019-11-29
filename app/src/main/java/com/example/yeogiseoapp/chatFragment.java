@@ -33,7 +33,7 @@ public class chatFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
     chatAdapter mAdapter;
-    String name;
+    String room, name;
     List<chat> l = new ArrayList<>();
     Button sendBtn;
     EditText editText;
@@ -46,7 +46,7 @@ public class chatFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_chat, container, false);
-        name = ((roomActivity)getActivity()).getName();
+
         sendBtn = (Button)v.findViewById(R.id.sendbtn);
         editText = (EditText)v.findViewById(R.id.message);
         try {
@@ -62,12 +62,15 @@ public class chatFragment extends Fragment {
         }).on("message_from_server", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                getActivity().runOnUiThread(new Runnable(){
-                    @Override
-                    public void run() {
-                        sendStr(args[0].toString(), args[1].toString());
-                    }
-                });
+                if(args[0].toString().equals(room)) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            sendStr(args[1].toString(), args[2].toString());
+                        }
+                    });
+                }
             }
         });
 
@@ -77,7 +80,7 @@ public class chatFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String msg = editText.getText().toString();
-                mSocket.emit("message_from_client", name, msg);
+                mSocket.emit("message_from_client", room, name, msg);
             }
         });
         return v;
@@ -95,6 +98,7 @@ public class chatFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         name = ((roomActivity)getActivity()).getName();
+        room = ((roomActivity)getActivity()).getRoom();
 
         // specify an adapter (see also next example)
         mAdapter = new chatAdapter(l, name);
