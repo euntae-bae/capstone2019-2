@@ -2,6 +2,7 @@ package com.example.yeogiseoapp;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,6 +33,7 @@ public class mapFragment extends Fragment
     private GoogleMap mMap;
     ArrayList<Polyline> polylines = new ArrayList<Polyline>();
     ArrayList<LatLng> markers = new ArrayList<LatLng>();
+    Button allowBtn;
 
     public mapFragment()
     {
@@ -48,6 +51,14 @@ public class mapFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_map, container, false);
 
+        allowBtn = layout.findViewById(R.id.togetherBtn);
+
+        allowBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((roomActivity)getActivity()).sendAllow();
+            }
+        });
         mapView = (MapView)layout.findViewById(R.id.map);
         mapView.getMapAsync(this);
 
@@ -171,8 +182,7 @@ public class mapFragment extends Fragment
 
     public void moveCamera(LatLng dest){
         mMap.moveCamera(CameraUpdateFactory.newLatLng(dest));
-
         mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
-
     }
+
 }

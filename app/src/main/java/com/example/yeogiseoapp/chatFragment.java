@@ -62,15 +62,22 @@ public class chatFragment extends Fragment {
         }).on("message_from_server", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                if(args[0].toString().equals(room)) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
-                            sendStr(args[1].toString(), args[2].toString());
+                            sendStr(args[0].toString(), args[1].toString());
                         }
                     });
-                }
+            }
+        }).on("ask_from_server", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ((roomActivity)getActivity()).openTogetherPopup();
+                        }
+                    });
             }
         });
 
@@ -80,7 +87,7 @@ public class chatFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String msg = editText.getText().toString();
-                mSocket.emit("message_from_client", room, name, msg);
+                mSocket.emit("message_from_client", name, msg);
             }
         });
         return v;
@@ -99,6 +106,7 @@ public class chatFragment extends Fragment {
 
         name = ((roomActivity)getActivity()).getName();
         room = ((roomActivity)getActivity()).getRoom();
+        mSocket.emit("joinRoom", room);
 
         // specify an adapter (see also next example)
         mAdapter = new chatAdapter(l, name);
@@ -114,5 +122,9 @@ public class chatFragment extends Fragment {
         mAdapter.notifyItemInserted(l.size() -1);
         recyclerView.scrollToPosition(l.size()-1);
         editText.setText("");
+    }
+
+    public void emitTogether(){
+        mSocket.emit("ask_from_client", name);
     }
 }

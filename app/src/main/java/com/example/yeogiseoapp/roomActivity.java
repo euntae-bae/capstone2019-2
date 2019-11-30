@@ -357,4 +357,14 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    public void openTogetherPopup(){
+        //데이터 담아서 팝업(액티비티) 호출
+        Intent intent = new Intent(this, popuptogetherActivity.class);
+        intent.putExtra("data", "Test Popup");
+        startActivityForResult(intent, 1);
+    }
+
+    public void sendAllow(){
+        cf.emitTogether();
+    }
 }
