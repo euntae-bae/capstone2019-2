@@ -16,7 +16,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -57,6 +56,7 @@ public class mapFragment extends Fragment
             @Override
             public void onClick(View v) {
                 ((roomActivity)getActivity()).sendAllow();
+                ((roomActivity)getActivity()).openOverlay();
             }
         });
         mapView = (MapView)layout.findViewById(R.id.map);

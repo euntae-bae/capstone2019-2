@@ -47,7 +47,13 @@
 
         <activity
             android:name=".mapFragment"/>
+
+        <activity android:name=".popuptogetherActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Light.Dialog"/>
+
+        <activity android:name=".mapOverlay"
+            android:theme="@style/Transparent"
+            />
     </application>
-    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

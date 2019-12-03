@@ -13,7 +13,6 @@ public class popuptogetherActivity extends Activity {
 
     TextView txtText;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +26,7 @@ public class popuptogetherActivity extends Activity {
         //데이터 가져오기
         Intent intent = getIntent();
         String data = intent.getStringExtra("data");
-        txtText.setText(data);
+        txtText.setText(data + "님의 같이보기 요청");
     }
 
     //거절 버튼 클릭

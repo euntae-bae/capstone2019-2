@@ -29,6 +29,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -51,6 +53,7 @@ public class roomActivity extends AppCompatActivity
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
     mapFragment mf;
+    mapOverlay mo;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
 
@@ -64,6 +67,7 @@ public class roomActivity extends AppCompatActivity
         name = intent.getStringExtra("nickname");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
+        mo = (mapOverlay) getSupportFragmentManager().findFragmentById(R.id.canvasfrag);
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
 
@@ -87,7 +91,6 @@ public class roomActivity extends AppCompatActivity
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navigationView.setNavigationItemSelectedListener(this);
-
 
     }
     @Override
@@ -357,14 +360,43 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
-    public void openTogetherPopup(){
+    public void openTogetherPopup(String who){
         //데이터 담아서 팝업(액티비티) 호출
         Intent intent = new Intent(this, popuptogetherActivity.class);
-        intent.putExtra("data", "Test Popup");
+        intent.putExtra("data", who);
         startActivityForResult(intent, 1);
     }
 
     public void sendAllow(){
         cf.emitTogether();
+    }
+    public void openOverlay(){
+        FragmentManager fm=getSupportFragmentManager();
+        FragmentTransaction ft=fm.beginTransaction();
+        ft.add(R.id.canvasfrag,new mapOverlay());
+        Toast.makeText(this, "Fragment is added!!!!!!", Toast.LENGTH_SHORT).show();
+        ft.addToBackStack(null);
+        ft.commit();
+
+    }
+
+    public void deleteFrag(View v){
+        FragmentManager fm=getSupportFragmentManager();
+        FragmentTransaction ft=fm.beginTransaction();
+        if(fm.getBackStackEntryCount()>0) {
+            fm.popBackStack();
+            Toast.makeText(this, "Fragment is deleted!!!!!!", Toast.LENGTH_SHORT).show();
+        }
+        ft.commit();
+    }
+
+    public void replace(View v)
+    {
+        FragmentManager fm=getSupportFragmentManager();
+        FragmentTransaction ft=fm.beginTransaction();
+        ft.replace(R.id.canvasfrag,new mapOverlay());
+        Toast.makeText(this, "Fragment is replaced!!!!!!", Toast.LENGTH_SHORT).show();
+        ft.addToBackStack(null);
+        ft.commit();
     }
 }

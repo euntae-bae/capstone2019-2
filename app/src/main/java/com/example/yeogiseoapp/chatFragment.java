@@ -75,7 +75,7 @@ public class chatFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ((roomActivity)getActivity()).openTogetherPopup();
+                            ((roomActivity) getActivity()).openTogetherPopup(args[0].toString());
                         }
                     });
             }
@@ -87,7 +87,7 @@ public class chatFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 String msg = editText.getText().toString();
-                mSocket.emit("message_from_client", name, msg);
+                mSocket.emit("message_from_client", room, name, msg);
             }
         });
         return v;
@@ -125,6 +125,6 @@ public class chatFragment extends Fragment {
     }
 
     public void emitTogether(){
-        mSocket.emit("ask_from_client", name);
+        mSocket.emit("ask_from_client", room, name);
     }
 }
