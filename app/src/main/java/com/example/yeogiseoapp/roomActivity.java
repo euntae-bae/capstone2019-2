@@ -14,16 +14,12 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.os.FileUtils;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,22 +32,36 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import com.google.android.gms.maps.model.LatLng;
+import com.example.yeogiseoapp.data.ExifData;
+import com.example.yeogiseoapp.data.ExifUploadResponse;
+import com.example.yeogiseoapp.data.ImageUploadResponse;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
+    private ServiceApi service = null;
+
     String id, info, name, room;
     private static final int REQUEST_CODE = 200;
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
+    ArrayList<ExifData> exifDataArrayList = new ArrayList<>();
     chatFragment cf;
     mapFragment mf;
     mapOverlay mo;
@@ -75,6 +85,9 @@ public class roomActivity extends AppCompatActivity
         mo = (mapOverlay) getSupportFragmentManager().findFragmentById(R.id.canvasfrag);
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
+
+        //전송
+        service = RetrofitClient.getInstance().create(ServiceApi.class);
 
         cf.initChat();
 
@@ -128,6 +141,21 @@ public class roomActivity extends AppCompatActivity
                 || super.onSupportNavigateUp();
     }
 
+    private MultipartBody.Part prepareFilePart(String partName, Uri fileUri) {
+        // use the FileUtils to get the actual file by uri
+        File file = new File(fileUri.getPath());
+
+        // create RequestBody instance from file
+        RequestBody requestFile =
+                RequestBody.create(
+                        MediaType.parse(getContentResolver().getType(fileUri)),
+                        file
+                );
+
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
+
     public String getEmail(){
         return id;
     }
@@ -135,36 +163,34 @@ public class roomActivity extends AppCompatActivity
         return name;
     }
     public String getRoom() { return room; }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == REQUEST_CODE) {
 
+            //클립보드에서 데이터 가져옴
             ClipData clipData = data.getClipData();
             Uri uri = data.getData();
             PhotoInfo temp = new PhotoInfo();
             if(clipData != null) {
                 for (int i = 0; i < clipData.getItemCount(); i++) {
                     photoInfoList.add(new PhotoInfo(clipData.getItemAt(i).getUri()));
+                    //여러개라 클립보드에서 가져왔을 때
                 }
             }else if(uri != null) {
                 photoInfoList.add(new PhotoInfo(uri));
+                //하나일 때
             }
 
             InputStream in = null;
             String imgpath = "";
             try {
-                for(int i=0; i<photoInfoList.size(); i++){
-                    in = getContentResolver().openInputStream(photoInfoList.get(i).uri);
-                    temp = getExifInfo(in);
-                    photoInfoList.get(i).time = temp.time;
-                    photoInfoList.get(i).longitude = temp.longitude;
-                    photoInfoList.get(i).latitude = temp.latitude;
-                    photoInfoList.get(i).orientation = temp.orientation;
-                    if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
-                        photoInfoList.remove(photoInfoList.get(i));
-                        continue;
-                    }
-                }
+
+                //TODO :: 업로드 시에 여러번에 걸쳐서 업로드하면 오류가 생기는 듯 함
+                //이전 이미지와 같이 스택이 되어서 보내짐(메타데이터가, DB에)
+
+
+                //사진을 시간순대로 정렬(소트)
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
                     @Override
                     public int compare(PhotoInfo arg0, PhotoInfo arg1) {
@@ -180,6 +206,89 @@ public class roomActivity extends AppCompatActivity
                     }
                 });
 
+                //데이터 작업쳐서 가져옴
+                for(int i=0; i<photoInfoList.size(); i++){
+                    in = getContentResolver().openInputStream(photoInfoList.get(i).uri);
+                    temp = getExifInfo(in);
+
+                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filename = filepath.substring(filepath.lastIndexOf("/")+1);
+                    photoInfoList.get(i).time = temp.time;
+                    photoInfoList.get(i).longitude = temp.longitude;
+                    photoInfoList.get(i).latitude = temp.latitude;
+                    photoInfoList.get(i).orientation = temp.orientation;
+                    if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
+                        photoInfoList.remove(photoInfoList.get(i));
+                        continue;
+                    }
+
+                    //데이터 서버측으로 전송할 준비
+                    // 데이터를 모아서 하나의 JSON으로 보내야 함.
+                    //filename 읽어서 바꿔줘야 함
+                    exifDataArrayList.add(new ExifData(filename,temp.longitude,temp.latitude,temp.time));
+
+                }
+
+                service.exifUpload(exifDataArrayList).enqueue(new Callback<ExifUploadResponse>() {
+                    @Override
+                    public void onResponse(Call<ExifUploadResponse> call, Response<ExifUploadResponse> response) {
+                        ExifUploadResponse result = response.body();
+                        int code = result.getCode();
+                        String message = result.getMessage();
+
+                        if(code == 404){
+                            Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(roomActivity.this,message,Toast.LENGTH_SHORT).show();
+                            //업로드쪽 서비스 시작.
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ExifUploadResponse> call, Throwable t) {
+                        Toast.makeText(roomActivity.this,"전송 오류 발생",Toast.LENGTH_SHORT).show();
+                        Log.e("전송 오류 발생", t.getMessage());
+                    }
+                });
+
+
+
+
+                //TODO : 파일 실제 전송(multer)
+
+                List<MultipartBody.Part> parts = new ArrayList<>();
+                //part의 리스트
+
+                parts.add(prepareFilePart("photo",photoInfoList.get(0).uri));
+
+                RequestBody description = RequestBody.create(
+                        okhttp3.MultipartBody.FORM, "photo");
+                //desc생성
+
+                service.imageUploadDynamic(parts,description).enqueue(new Callback<ImageUploadResponse>() {
+                    @Override
+                    public void onResponse(Call<ImageUploadResponse> call, Response<ImageUploadResponse> response) {
+                        int code = response.body().getCode();
+                        if(code == 500) {
+                            Toast.makeText(roomActivity.this,"업로드 서버측 오류 발생",Toast.LENGTH_SHORT).show();
+                        }else{
+                            Toast.makeText(roomActivity.this,"업로드 성공",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ImageUploadResponse> call, Throwable t) {
+                        Toast.makeText(roomActivity.this,"업로드 오류 발생",Toast.LENGTH_SHORT).show();
+                        Log.e("업로드 오류 발생", t.getMessage());
+                    }
+                });
+
+
+                //보낸 데이터 정리해보리기
+                exifDataArrayList.clear();
+
+                // 맵에 마커 찍는 부분
                 Bitmap src;
                 Drawable drawable;
                 navigationView.getMenu().clear();
