@@ -29,7 +29,6 @@ public class mapOverlay extends Fragment {
                                 Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_mapoverlay, container, false);
 
-
         back_btn = v.findViewById(R.id.exitPaintBtn);
         back_btn.setOnClickListener(new OnClickListener() {
             @Override
@@ -50,8 +49,6 @@ class Paper extends View {
     float y ;
     float x ;
 
-
-
     public Paper(Context context) {
         super(context);
     }
@@ -65,7 +62,13 @@ class Paper extends View {
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
 
-        canvas.drawPath(path, paint);
+        if(((roomActivity)getContext()).isDrawing && ((roomActivity)getContext()).chkDrawstatus == 2) {
+            ((roomActivity) getContext()).cfPathEmit(path);
+            canvas.drawPath(path, paint);
+        }else if(((roomActivity)getContext()).isDrawing && ((roomActivity)getContext()).chkDrawstatus == 1) {
+            ((roomActivity) getContext()).cfPathEmit(path);
+            canvas.drawPath(path, paint);
+        }
     }
 
     @Override

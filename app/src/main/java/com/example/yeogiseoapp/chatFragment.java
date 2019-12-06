@@ -1,6 +1,7 @@
 package com.example.yeogiseoapp;
 
 import android.content.Context;
+import android.graphics.Path;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -79,6 +80,16 @@ public class chatFragment extends Fragment {
                         }
                     });
             }
+        }).on("path_from_server", new Emitter.Listener() {
+                    @Override
+                    public void call(final Object... args) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((roomActivity) getActivity()).openTogetherPopup(args[0].toString());
+                            }
+                        });
+                    }
         });
 
         mSocket.connect();
@@ -127,4 +138,6 @@ public class chatFragment extends Fragment {
     public void emitTogether(){
         mSocket.emit("ask_from_client", room, name);
     }
+
+    public void emitPath(Path path) { mSocket.emit("path_from_client", room, path); }
 }

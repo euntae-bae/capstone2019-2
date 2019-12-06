@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -56,12 +57,16 @@ public class roomActivity extends AppCompatActivity
     mapOverlay mo;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
+    boolean isDrawing;
+    // 0 : No, 1 : Yes, 2 : Host
+    int chkDrawstatus;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room);
+        isDrawing = false;
         Intent intent = getIntent();
         id = intent.getStringExtra("id");
         name = intent.getStringExtra("nickname");
@@ -367,17 +372,16 @@ public class roomActivity extends AppCompatActivity
         startActivityForResult(intent, 1);
     }
 
-    public void sendAllow(){
-        cf.emitTogether();
-    }
+    public void sendAllow(){ cf.emitTogether(); }
+    public void cfPathEmit(Path path) { cf.emitPath(path); }
     public void openOverlay(){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();
         ft.add(R.id.canvasfrag,new mapOverlay());
-        Toast.makeText(this, "Fragment is added!!!!!!", Toast.LENGTH_SHORT).show();
         ft.addToBackStack(null);
+        chkDrawstatus = 2;
+        isDrawing = true;
         ft.commit();
-
     }
 
     public void deleteFrag(View v){
@@ -385,18 +389,8 @@ public class roomActivity extends AppCompatActivity
         FragmentTransaction ft=fm.beginTransaction();
         if(fm.getBackStackEntryCount()>0) {
             fm.popBackStack();
-            Toast.makeText(this, "Fragment is deleted!!!!!!", Toast.LENGTH_SHORT).show();
         }
-        ft.commit();
-    }
-
-    public void replace(View v)
-    {
-        FragmentManager fm=getSupportFragmentManager();
-        FragmentTransaction ft=fm.beginTransaction();
-        ft.replace(R.id.canvasfrag,new mapOverlay());
-        Toast.makeText(this, "Fragment is replaced!!!!!!", Toast.LENGTH_SHORT).show();
-        ft.addToBackStack(null);
+        isDrawing = false;
         ft.commit();
     }
 }
