@@ -56,7 +56,7 @@ public class mapFragment extends Fragment
             @Override
             public void onClick(View v) {
                 ((roomActivity)getActivity()).sendAllow();
-                ((roomActivity)getActivity()).openOverlay();
+                ((roomActivity)getActivity()).openOverlay(2);
             }
         });
         mapView = (MapView)layout.findViewById(R.id.map);

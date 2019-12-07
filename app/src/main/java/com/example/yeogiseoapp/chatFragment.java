@@ -86,10 +86,24 @@ public class chatFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ((roomActivity) getActivity()).openTogetherPopup(args[0].toString());
+                                if(((roomActivity) getActivity()).getIsDrawing()) {
+                                    ((roomActivity) getActivity()).drawByReceivedData(Float.parseFloat(args[0].toString()), Float.parseFloat(args[1].toString()));
+                                }
                             }
                         });
                     }
+        }).on("stop_drawing_from_server", new Emitter.Listener() {
+            @Override
+            public void call(final Object... args) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(((roomActivity) getActivity()).getIsDrawing()) {
+                            ((roomActivity) getActivity()).stopDrawing();
+                        }
+                    }
+                });
+            }
         });
 
         mSocket.connect();
@@ -139,5 +153,10 @@ public class chatFragment extends Fragment {
         mSocket.emit("ask_from_client", room, name);
     }
 
-    public void emitPath(Path path) { mSocket.emit("path_from_client", room, path); }
+    public void emitPath(float x, float y) { mSocket.emit("path_from_client", room, x, y); }
+
+    public void emitStop(){
+        mSocket.emit("stop_drawing_from_client", room);
+    }
+
 }

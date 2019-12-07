@@ -8,22 +8,16 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.ActionProvider;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,7 +31,6 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.FileNotFoundException;
@@ -54,13 +47,13 @@ public class roomActivity extends AppCompatActivity
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
     mapFragment mf;
-    mapOverlay mo;
+    popuptogetherFragment pf;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
     boolean isDrawing;
     // 0 : No, 1 : Yes, 2 : Host
     int chkDrawstatus;
-
+    public Paper paper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +65,14 @@ public class roomActivity extends AppCompatActivity
         name = intent.getStringExtra("nickname");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
-        mo = (mapOverlay) getSupportFragmentManager().findFragmentById(R.id.canvasfrag);
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
+
 
         cf.initChat();
 
         Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -96,7 +90,6 @@ public class roomActivity extends AppCompatActivity
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navigationView.setNavigationItemSelectedListener(this);
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -188,7 +181,7 @@ public class roomActivity extends AppCompatActivity
                             + String.valueOf(photoInfoList.get(i).latitude) + '\n'
                             + String.valueOf(photoInfoList.get(i).longitude));
 
-                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 120, 60), photoInfoList.get(i).orientation);
+                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 150, 100), photoInfoList.get(i).orientation);
 
                     smallPics.add(src);
 
@@ -366,24 +359,24 @@ public class roomActivity extends AppCompatActivity
     }
 
     public void openTogetherPopup(String who){
-        //데이터 담아서 팝업(액티비티) 호출
-        Intent intent = new Intent(this, popuptogetherActivity.class);
-        intent.putExtra("data", who);
-        startActivityForResult(intent, 1);
+        popuptogetherFragment dialog = popuptogetherFragment.newInstance(
+                getString(R.string.popup_dialog_msg, who)
+        );
+        pf = dialog;
+        dialog.show(getSupportFragmentManager(), "dialog");
     }
 
     public void sendAllow(){ cf.emitTogether(); }
-    public void cfPathEmit(Path path) { cf.emitPath(path); }
-    public void openOverlay(){
+    public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
+    public void openOverlay(int i){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();
         ft.add(R.id.canvasfrag,new mapOverlay());
         ft.addToBackStack(null);
-        chkDrawstatus = 2;
-        isDrawing = true;
+        chkDrawstatus = i;
+
         ft.commit();
     }
-
     public void deleteFrag(View v){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();
@@ -393,4 +386,34 @@ public class roomActivity extends AppCompatActivity
         isDrawing = false;
         ft.commit();
     }
+
+    public void mOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.popAllowBtn:
+                openOverlay(1);
+                isDrawing = true;
+                pf.dismissDialog();
+                break;
+
+            case R.id.popDeclineBtn:
+                isDrawing = false;
+                pf.dismissDialog();
+                break;
+        }
+    }
+
+    public void drawByReceivedData(float x, float y){
+            paper.receivePath(x, y);
+    }
+    public void setChkDrawstatus(int i){ chkDrawstatus = i; }
+    public void setisDrawing(boolean b){ isDrawing = b; }
+    public int getChkDrawstatus(){ return chkDrawstatus; }
+
+
+    public boolean getIsDrawing(){ return isDrawing; }
+    public void emitStopDrawing(){ cf.emitStop(); }
+    public void stopDrawing(){ paper.chkDrawing = false; }
+
+
+
 }

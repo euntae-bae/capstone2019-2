@@ -48,7 +48,7 @@
         <activity
             android:name=".mapFragment"/>
 
-        <activity android:name=".popuptogetherActivity"
+        <activity android:name=".popuptogetherFragment"
             android:theme="@android:style/Theme.DeviceDefault.Light.Dialog"/>
 
         <activity android:name=".mapOverlay"

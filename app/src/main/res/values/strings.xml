@@ -14,7 +14,7 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
     <string name="title_activity_drawer">drawerActivity</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">로그인</string>
     <string name="action_register">회원가입</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -25,6 +25,7 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_hall">hallActivity</string>
+    <string name="popup_dialog_msg">%1$s님의 같이보기 요청</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

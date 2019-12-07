@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/txtText"
+            android:id="@+id/popBodyText"
             android:textSize="15sp"
             android:textColor="#000"
             android:alpha="0.87"
@@ -52,6 +52,7 @@
         android:layout_height="wrap_content">
         <Button
             android:text="수락"
+            android:id="@+id/popAllowBtn"
             android:textSize="15sp"
             android:textColor="#ff7a00"
             android:padding="16dp"
@@ -60,9 +61,10 @@
             android:layout_width="0dp"
             android:layout_height="53dp"
             android:layout_weight="1"
-            android:onClick="mOnAllow"/>
+            android:onClick="mOnClick"/>
         <Button
             android:text="거절"
+            android:id="@+id/popDeclineBtn"
             android:textSize="15sp"
             android:textColor="#ff7a00"
             android:padding="16dp"
@@ -71,7 +73,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="53dp"
-            android:onClick="mOnClose"/>
+            android:onClick="mOnClick"/>
     </LinearLayout>
     <!--// 닫기 버튼 -->
 </LinearLayout>
