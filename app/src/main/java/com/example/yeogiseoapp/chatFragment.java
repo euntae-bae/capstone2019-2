@@ -63,6 +63,9 @@ public class chatFragment extends Fragment {
         }).on("message_from_server", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
+                if(getActivity() == null)
+                    return ;
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -73,6 +76,8 @@ public class chatFragment extends Fragment {
         }).on("ask_from_server", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
+                if(getActivity() == null)
+                    return ;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -83,6 +88,8 @@ public class chatFragment extends Fragment {
         }).on("path_from_server", new Emitter.Listener() {
                     @Override
                     public void call(final Object... args) {
+                        if(getActivity() == null)
+                            return ;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -95,6 +102,9 @@ public class chatFragment extends Fragment {
         }).on("stop_drawing_from_server", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
+                if(getActivity() == null)
+                    return ;
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

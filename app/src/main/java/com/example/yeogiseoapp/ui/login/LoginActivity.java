@@ -4,9 +4,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,12 +30,13 @@ public class LoginActivity extends AppCompatActivity {
     private EditText edtTextEmail = null;
     private EditText edtTextPassword = null;
     private ServiceApi service = null;
+    private TextView.OnEditorActionListener txtActionListener;
+    private Button loginButton = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         /*
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
@@ -41,9 +45,14 @@ public class LoginActivity extends AppCompatActivity {
 
         edtTextEmail = findViewById(R.id.edtTextLoginEmail);
         edtTextPassword = findViewById(R.id.edtTextLoginPassword);
+
+
+
+
+
         //final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
-        final Button loginButton = findViewById(R.id.login);
+        loginButton = findViewById(R.id.login);
         final Button registerButton = findViewById(R.id.register);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,6 +69,28 @@ public class LoginActivity extends AppCompatActivity {
                 attemptLogin();
             }
         });
+
+        txtActionListener = new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                switch (actionId) {
+                    case EditorInfo.IME_ACTION_NEXT:
+                        edtTextPassword.requestFocus();
+                        break;
+
+                    case EditorInfo.IME_ACTION_SEND:
+                        loginButton.performClick();
+                        break;
+                    default:
+                        // 기본 엔터키 동작
+                        return false;
+                }
+                return true;
+            }
+        };
+
+        edtTextEmail.setOnEditorActionListener(txtActionListener);
+        edtTextPassword.setOnEditorActionListener(txtActionListener);
     }
     // 입력된 사용자 정보의 형식을 검사한다
     private void attemptLogin() {

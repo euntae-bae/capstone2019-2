@@ -23,9 +23,9 @@
         android:singleLine="true"
         android:lines="1"
         android:hint="@string/prompt_email"
+        android:imeOptions="actionNext"
 
-
-        android:inputType="textMultiLine|textNoSuggestions|textEmailAddress"
+        android:inputType="textNoSuggestions|textEmailAddress"
         android:padding="@dimen/editText_inner_padding"
         android:selectAllOnFocus="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -44,10 +44,10 @@
         android:hint="@string/prompt_password"
         android:singleLine="true"
         android:lines="1"
-
         android:imeActionLabel="@string/action_sign_in_short"
-        android:imeOptions="actionDone"
-        android:inputType="textMultiLine|textNoSuggestions|textPassword"
+        android:imeOptions="actionSend"
+
+        android:inputType="textNoSuggestions|textPassword"
         android:padding="@dimen/editText_inner_padding"
         android:selectAllOnFocus="true"
         app:layout_constraintEnd_toEndOf="parent"

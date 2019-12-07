@@ -44,7 +44,7 @@ public class mapOverlay extends Fragment {
 class Paper extends View {
     Handler timerHandler;
 
-    final static int repeat_delay = 100;
+    final static int repeat_delay = 50;
     public String test= "test";
 
     Paint paint = new Paint();
