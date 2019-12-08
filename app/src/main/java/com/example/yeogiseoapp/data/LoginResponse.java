@@ -10,7 +10,7 @@ public class LoginResponse {
     @SerializedName("username")
     private String username;
     @SerializedName("id")
-    private int id;
+    private String id;
     @SerializedName("email")
     private String email;
     @SerializedName("password")
@@ -25,8 +25,8 @@ public class LoginResponse {
     public String getUsername() {
         return username;
     }
-    public int getId() {
-        return code;
+    public String getId() {
+        return id;
     }
     public String getEmail() {
         return email;

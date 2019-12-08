@@ -137,9 +137,10 @@ public class LoginActivity extends AppCompatActivity {
                     // SharedPreferences에 로그인 정보를 저장한다.
                     SharedPreferences sp = getSharedPreferences("loggedinData", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sp.edit();
-                    editor.putString("loggedinEmail", data.getEmail());
-                    editor.putString("loggedinPassword", data.getPassword());
-                    editor.putString("loggedinNickname", username);
+                    editor.putString("loggedinEmail", result.getEmail());
+                    editor.putString("loggedinPassword", result.getPassword());
+                    editor.putString("loggedinUsername", result.getUsername());
+                    editor.putString("loggedinId", result.getId());
                     editor.commit();
                     Log.d("login succeed", "email: " + data.getEmail() + "/password: " + data.getPassword());
 

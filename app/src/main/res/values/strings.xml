@@ -25,7 +25,8 @@
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
     <string name="title_activity_hall">hallActivity</string>
-    <string name="popup_dialog_msg">%1$s님의 같이보기 요청</string>
+    <string name="allow_popup_dialog_msg">%1$s님의 같이보기 요청</string>
+
     <string name="large_text">
         "Material is the metaphor.\n\n"
 

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/hall_bg"
+    android:id="@+id/hall_layout"
     tools:context=".HallActivity">
 
     <com.google.android.material.appbar.AppBarLayout

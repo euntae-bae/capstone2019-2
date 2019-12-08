@@ -1,5 +1,7 @@
 package com.example.yeogiseoapp;
 
+import com.example.yeogiseoapp.data.GroupData;
+import com.example.yeogiseoapp.data.GroupResponse;
 import com.example.yeogiseoapp.data.LoginData;
 import com.example.yeogiseoapp.data.LoginResponse;
 import com.example.yeogiseoapp.data.RegisterData;
@@ -14,4 +16,6 @@ public interface ServiceApi {
     Call<LoginResponse> userLogin(@Body LoginData data);
     @POST("/register")
     Call<RegisterResponse> userRegister(@Body RegisterData data);
+    @POST("/make-group")
+    Call<GroupResponse> groupMake(@Body GroupData data);
 }

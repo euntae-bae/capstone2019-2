@@ -42,7 +42,7 @@ import java.util.Comparator;
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
-    String id, info, name, room;
+    String email, info, username, room;
     private static final int REQUEST_CODE = 200;
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
@@ -61,8 +61,8 @@ public class roomActivity extends AppCompatActivity
         setContentView(R.layout.activity_room);
         isDrawing = false;
         Intent intent = getIntent();
-        id = intent.getStringExtra("id");
-        name = intent.getStringExtra("nickname");
+        email = intent.getStringExtra("email");
+        username = intent.getStringExtra("username");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
         room = intent.getStringExtra("room");
@@ -122,17 +122,21 @@ public class roomActivity extends AppCompatActivity
     }
 
     public String getEmail(){
-        return id;
+        return email;
     }
-    public String getName(){
-        return name;
+    public String getUsername(){
+        return username;
     }
     public String getRoom() { return room; }
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == REQUEST_CODE) {
 
-            ClipData clipData = data.getClipData();
+            ClipData clipData;
+            if(data.getClipData() == null)
+                return ;
+            else
+                clipData = data.getClipData();
             Uri uri = data.getData();
             PhotoInfo temp = new PhotoInfo();
             if(clipData != null) {
@@ -177,11 +181,11 @@ public class roomActivity extends AppCompatActivity
                 Drawable drawable;
                 navigationView.getMenu().clear();
                 for(int i=0; i<photoInfoList.size(); i++){
-                    cf.sendStr(name, String.valueOf(photoInfoList.get(i).time) + '\n'
+                    cf.sendStr(username, String.valueOf(photoInfoList.get(i).time) + '\n'
                             + String.valueOf(photoInfoList.get(i).latitude) + '\n'
                             + String.valueOf(photoInfoList.get(i).longitude));
 
-                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 150, 100), photoInfoList.get(i).orientation);
+                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 130, 87), photoInfoList.get(i).orientation);
 
                     smallPics.add(src);
 
@@ -360,7 +364,7 @@ public class roomActivity extends AppCompatActivity
 
     public void openTogetherPopup(String who){
         popuptogetherFragment dialog = popuptogetherFragment.newInstance(
-                getString(R.string.popup_dialog_msg, who)
+                getString(R.string.allow_popup_dialog_msg, who)
         );
         pf = dialog;
         dialog.show(getSupportFragmentManager(), "dialog");
@@ -387,7 +391,7 @@ public class roomActivity extends AppCompatActivity
         ft.commit();
     }
 
-    public void mOnClick(View v) {
+    public void mAllowOnClick(View v) {
         switch (v.getId()) {
             case R.id.popAllowBtn:
                 openOverlay(1);

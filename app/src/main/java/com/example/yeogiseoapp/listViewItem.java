@@ -28,6 +28,4 @@ public class listViewItem {
     public String getInfo() {
         return this.infoStr;
     }
-
-
 }

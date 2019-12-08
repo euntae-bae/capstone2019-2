@@ -11,32 +11,47 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="같이보기 요청"
+            android:text="그룹 생성하기"
             android:textSize="20sp"
-            android:textColor="#fff"
+            android:textColor="#000000"
             android:gravity="center"
-            android:background="#ff7a00"
+            android:background="#AEFFA7"
             android:layout_width="match_parent"
             android:layout_height="53dp" />
     </LinearLayout>
     <!-- //end 타이틀바 -->
 
     <!-- Notice -->
-    <LinearLayout
+    <RelativeLayout
         android:padding="24dp"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:id="@+id/popBodyText"
-            android:textSize="15sp"
+            android:textSize="20dp"
             android:textColor="#000"
             android:alpha="0.87"
-            android:gravity="center"
             android:layout_marginBottom="3dp"
-            android:layout_width="match_parent"
+            android:text="그룹명 : "
+            android:id="@+id/groupText"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-    </LinearLayout>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000"
+            android:padding="5dp"
+            android:alpha="0.87"
+            android:background="@drawable/inputdraw"
+            android:id="@+id/groupEdtText"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="3dp"
+            android:textSize="20dp"
+            android:layout_toEndOf="@id/groupText"/>
+
+    </RelativeLayout>
     <!-- Notice -->
 
     <View
@@ -51,29 +66,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
-            android:text="수락"
-            android:id="@+id/popAllowBtn"
+            android:text="확인"
+            android:id="@+id/popOkBtn"
             android:textSize="15sp"
-            android:textColor="#ff7a00"
+            android:textColor="#128D00"
             android:padding="16dp"
             android:gravity="center"
             android:background="#00000000"
             android:layout_width="0dp"
             android:layout_height="53dp"
             android:layout_weight="1"
-            android:onClick="mAllowOnClick"/>
+            android:onClick="mGroupOnClick"/>
         <Button
-            android:text="거절"
-            android:id="@+id/popDeclineBtn"
+            android:text="취소"
+            android:id="@+id/popNoBtn"
             android:textSize="15sp"
-            android:textColor="#ff7a00"
+            android:textColor="#13790A"
             android:padding="16dp"
             android:gravity="center"
             android:background="#00000000"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="53dp"
-            android:onClick="mAllowOnClick"/>
+            android:onClick="mGroupOnClick"/>
     </LinearLayout>
     <!--// 닫기 버튼 -->
 </LinearLayout>
