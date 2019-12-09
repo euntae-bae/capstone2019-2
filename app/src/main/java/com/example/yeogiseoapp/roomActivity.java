@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
@@ -31,7 +32,14 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.yeogiseoapp.data.FindUserData;
+import com.example.yeogiseoapp.data.FindUserResponse;
+import com.example.yeogiseoapp.data.GroupData;
+import com.example.yeogiseoapp.data.GroupResponse;
+import com.example.yeogiseoapp.data.InviteData;
+import com.example.yeogiseoapp.data.InviteResponse;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,14 +47,19 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
-    String email, info, username, room;
+    String email, info, username, room, gid;
     private static final int REQUEST_CODE = 200;
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
     mapFragment mf;
+    popupinviteFragment inviteFragment;
     popuptogetherFragment pf;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
@@ -54,6 +67,8 @@ public class roomActivity extends AppCompatActivity
     // 0 : No, 1 : Yes, 2 : Host
     int chkDrawstatus;
     public Paper paper;
+    ServiceApi service = null;
+    String tempUid = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,12 +76,14 @@ public class roomActivity extends AppCompatActivity
         setContentView(R.layout.activity_room);
         isDrawing = false;
         Intent intent = getIntent();
+        service = RetrofitClient.getInstance().create(ServiceApi.class);
         email = intent.getStringExtra("email");
         username = intent.getStringExtra("username");
         cf = (chatFragment) getSupportFragmentManager().findFragmentById(R.id.chat_content);
         mf = (mapFragment) getSupportFragmentManager().findFragmentById(R.id.map_content);
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
+        gid = intent.getStringExtra("gid");
 
 
         cf.initChat();
@@ -101,6 +118,9 @@ public class roomActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
+            case R.id.action_invite:
+                openInvitePopup();
+                return true;
             case R.id.action_upload:
                 Intent it = new Intent(Intent.ACTION_PICK);
                 it.setType(MediaStore.Images.Media.CONTENT_TYPE);
@@ -370,6 +390,12 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    public void openInvitePopup(){
+        popupinviteFragment dialog = popupinviteFragment.newInstance();
+        inviteFragment = dialog;
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
     public void sendAllow(){ cf.emitTogether(); }
     public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
     public void openOverlay(int i){
@@ -406,6 +432,21 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    public void mInviteOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.popInviteOkBtn:
+                String inviteEmail = inviteFragment.getInviteEmail();
+                findUserid(new FindUserData(inviteEmail));
+
+
+                break;
+
+            case R.id.popInviteNoBtn:
+                inviteFragment.dismissDialog();
+                break;
+        }
+    }
+
     public void drawByReceivedData(float x, float y){
             paper.receivePath(x, y);
     }
@@ -418,6 +459,60 @@ public class roomActivity extends AppCompatActivity
     public void emitStopDrawing(){ cf.emitStop(); }
     public void stopDrawing(){ paper.chkDrawing = false; }
 
+    private void inviteUser(final InviteData data) {
+        service.invite(data).enqueue(new Callback<InviteResponse>() {
+            @Override
+            public void onResponse(Call<InviteResponse> call, Response<InviteResponse> response) {
+                InviteResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
 
+                if (code == 201) {
+                    // 그룹 생성 성공
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    // 그룹 생성 실패
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
 
+            @Override
+            public void onFailure(Call<InviteResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "초대 과정 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("초대 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
+    private void findUserid(final FindUserData data) {
+        service.findUser(data).enqueue(new Callback<FindUserResponse>() {
+            @Override
+            public void onResponse(Call<FindUserResponse> call, Response<FindUserResponse> response) {
+                FindUserResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+
+                if (code == 201) {
+                    // 유저 검색 성공
+                    setTempUid(result.getId());
+                    inviteUser(new InviteData(gid, tempUid));
+                    inviteFragment.dismissDialog();
+                }
+                else {
+                    // 유저 검색 실패
+                    inviteFragment.dismissDialog();
+                    return ;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FindUserResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "유저 검색 과정 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("유저 검색 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
+    public void setTempUid(String uid){ tempUid = uid; }
 }

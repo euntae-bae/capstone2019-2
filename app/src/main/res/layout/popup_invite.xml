@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="그룹 생성하기"
+            android:text="유저 초대하기"
             android:textSize="20sp"
             android:textColor="#000000"
             android:gravity="center"
@@ -32,8 +32,8 @@
             android:textColor="#000"
             android:alpha="0.87"
             android:layout_marginBottom="3dp"
-            android:text="그룹명 : "
-            android:id="@+id/groupText"
+            android:text="이메일 : "
+            android:id="@+id/emailText"
             android:layout_centerVertical="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -45,11 +45,11 @@
             android:padding="5dp"
             android:alpha="0.87"
             android:background="@drawable/inputdraw"
-            android:id="@+id/groupEdtText"
+            android:id="@+id/inviteEdtText"
             android:layout_centerVertical="true"
             android:layout_marginBottom="3dp"
             android:textSize="20dp"
-            android:layout_toEndOf="@id/groupText"/>
+            android:layout_toEndOf="@id/emailText"/>
 
     </RelativeLayout>
     <!-- Notice -->
@@ -67,7 +67,7 @@
         android:layout_height="wrap_content">
         <Button
             android:text="확인"
-            android:id="@+id/popMakeGroupOkBtn"
+            android:id="@+id/popInviteOkBtn"
             android:textSize="15sp"
             android:textColor="#128D00"
             android:padding="16dp"
@@ -76,10 +76,10 @@
             android:layout_width="0dp"
             android:layout_height="53dp"
             android:layout_weight="1"
-            android:onClick="mGroupOnClick"/>
+            android:onClick="mInviteOnClick"/>
         <Button
             android:text="취소"
-            android:id="@+id/popMakeGroupNoBtn"
+            android:id="@+id/popInviteNoBtn"
             android:textSize="15sp"
             android:textColor="#13790A"
             android:padding="16dp"
@@ -88,7 +88,7 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="53dp"
-            android:onClick="mGroupOnClick"/>
+            android:onClick="mInviteOnClick"/>
     </LinearLayout>
     <!--// 닫기 버튼 -->
 </LinearLayout>

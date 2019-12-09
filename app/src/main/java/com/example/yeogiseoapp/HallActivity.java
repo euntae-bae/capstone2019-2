@@ -33,7 +33,7 @@ public class HallActivity extends AppCompatActivity {
 
     View layout;
     RoomAdapter adapter;
-    String email, username, id;
+    String email, username, id, gid;
     private SharedPreferences sp;
     private ServiceApi service = null;
     EditText groupName;
@@ -76,6 +76,7 @@ public class HallActivity extends AppCompatActivity {
                 intent.putExtra("username", username);
                 intent.putExtra("room", room);
                 intent.putExtra("info", info);
+                intent.putExtra("gid", gid);
                 startActivity(intent);
 
             }
@@ -99,6 +100,7 @@ public class HallActivity extends AppCompatActivity {
                 Toast.makeText(HallActivity.this, message, Toast.LENGTH_SHORT).show();
                 if (code == 201) {
                     // 그룹 생성 성공
+                    gid = groupID;
                     adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), data.getGroupName(), data.getGroupName()+" 입니다.");
                     Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -143,13 +145,13 @@ public class HallActivity extends AppCompatActivity {
 
     public void mGroupOnClick(View v) {
         switch (v.getId()) {
-            case R.id.popOkBtn:
+            case R.id.popMakeGroupOkBtn:
                 String gn = mf.getGroupName();
                 makeRoom(new GroupData(id, gn));
                 mf.dismissDialog();
                 break;
 
-            case R.id.popNoBtn:
+            case R.id.popMakeGroupNoBtn:
                 mf.dismissDialog();
                 break;
         }
