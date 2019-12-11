@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.yeogiseoapp.data.GroupData;
+import com.example.yeogiseoapp.data.GroupInquiryData;
+import com.example.yeogiseoapp.data.GroupInquiryResponse;
 import com.example.yeogiseoapp.data.GroupResponse;
 import com.example.yeogiseoapp.ui.login.LoginActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -24,6 +26,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -54,6 +58,7 @@ public class HallActivity extends AppCompatActivity {
         username = sp.getString("loggedinUsername", null);
         id = sp.getString("loggedinId", null);
         ListView listview;
+        inquiryGroup(new GroupInquiryData(id));
 
         adapter = new RoomAdapter();
         listview = (ListView)findViewById(R.id.listview);
@@ -83,13 +88,42 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
+    public void inquiryGroup(final GroupInquiryData data) {
+        service.groupInquiry(data).enqueue(new Callback<GroupInquiryResponse>() {
+            @Override
+            public void onResponse(Call<GroupInquiryResponse> call, Response<GroupInquiryResponse> response) {
+                GroupInquiryResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+                if (code == 201) {
+                    // 그룹 조회 성공
+                    int size = result.getSize();
+                    result.setGroupArr();
+                    for(int i=0; i<size; i++){
+                        makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i));
+                    }
+                }
+                else {
+                    // 그룹 조회 실패
+                    Log.d("group making failed", message);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GroupInquiryResponse> call, Throwable t) {
+                Toast.makeText(HallActivity.this, "그룹 조회 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 조회 오류 발생", t.getMessage());
+            }
+        });
+    }
+
     public void openMakeGroupPopup(){
         makegroupPopupFragment dialog = makegroupPopupFragment.newInstance();
         mf = dialog;
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
-    private void makeRoom(final GroupData data) {
+    private void makeGroup(final GroupData data) {
         service.groupMake(data).enqueue(new Callback<GroupResponse>() {
             @Override
             public void onResponse(Call<GroupResponse> call, Response<GroupResponse> response) {
@@ -101,10 +135,7 @@ public class HallActivity extends AppCompatActivity {
                 if (code == 201) {
                     // 그룹 생성 성공
                     gid = groupID;
-                    adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), data.getGroupName(), data.getGroupName()+" 입니다.");
-                    Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    adapter.notifyDataSetChanged();
+                    makeRoom(data.getGroupName(), username);
                 }
                 else {
                     // 그룹 생성 실패
@@ -118,6 +149,13 @@ public class HallActivity extends AppCompatActivity {
                 Log.e("그룹 생성 오류 발생", t.getMessage());
             }
         });
+    }
+
+    public void makeRoom(String title, String creator){
+        adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator);
+        Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -147,7 +185,7 @@ public class HallActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.popMakeGroupOkBtn:
                 String gn = mf.getGroupName();
-                makeRoom(new GroupData(id, gn));
+                makeGroup(new GroupData(id, gn));
                 mf.dismissDialog();
                 break;
 

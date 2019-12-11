@@ -4,6 +4,8 @@ import com.example.yeogiseoapp.data.FindUserData;
 import com.example.yeogiseoapp.data.FindUserResponse;
 import com.example.yeogiseoapp.data.GroupData;
 import com.example.yeogiseoapp.data.GroupResponse;
+import com.example.yeogiseoapp.data.GroupInquiryData;
+import com.example.yeogiseoapp.data.GroupInquiryResponse;
 import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
 import com.example.yeogiseoapp.data.LoginData;
@@ -26,4 +28,6 @@ public interface ServiceApi {
     Call<InviteResponse> invite(@Body InviteData data);
     @POST("/find-user")
     Call<FindUserResponse> findUser(@Body FindUserData data);
+    @POST("/group-inquiry")
+    Call<GroupInquiryResponse> groupInquiry(@Body GroupInquiryData data);
 }

@@ -19,33 +19,49 @@
             app:layout_constraintTop_toTopOf="parent"
             />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="10dp"
-        >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="10dp"
+            >
 
-        <TextView
-            android:id="@+id/roomName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="24dp"
-            android:textColor="#000000"
-            android:gravity="center_vertical"
-            />
-        <TextView
-            android:id="@+id/info"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textSize="16dp"
-            android:textColor="#666666"
-            />
+            <TextView
+                android:id="@+id/roomName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textSize="24dp"
+                android:textColor="#000000"
+                android:gravity="center_vertical"
+                />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="그룹 마스터 : "
+                    android:id="@+id/creatText"
+                    android:layout_centerVertical="true"
+                    android:textSize="16dp"
+                    android:textColor="#666666"
+                    />
+                <TextView
+                    android:id="@+id/info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@+id/creatText"
+                    android:layout_centerVertical="true"
+                    android:text="TextView"
+                    android:textSize="16dp"
+                    android:textColor="#666666"
+                    />
+            </RelativeLayout>
 
-    </LinearLayout>
         </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
