@@ -1,9 +1,11 @@
 package com.example.yeogiseoapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.example.yeogiseoapp.ui.login.LoginActivity;
@@ -12,6 +14,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.view.Menu;
@@ -42,6 +45,8 @@ public class HallActivity extends AppCompatActivity {
         sid = sp.getString("loggedinEmail", null);
         snickname = sp.getString("loggedinNickname", null);
         ListView listview;
+
+        checkPermission();
 
         adapter = new RoomAdapter();
         listview = (ListView)findViewById(R.id.listview);
@@ -97,5 +102,11 @@ public class HallActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void checkPermission(){
+        if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
     }
 }

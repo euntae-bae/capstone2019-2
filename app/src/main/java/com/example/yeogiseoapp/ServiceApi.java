@@ -25,12 +25,14 @@ public interface ServiceApi {
     @POST("/register")
     Call<RegisterResponse> userRegister(@Body RegisterData data);
     @POST("/getdata")
-    Call<ExifUploadResponse> exifUpload(@Body ArrayList<ExifData> data);
+    Call<List<ExifUploadResponse>> exifUpload(@Body ArrayList<ExifData> data);
+    @Multipart
     @POST("/upload")
     Call<ImageUploadResponse> imageUpload(@Part MultipartBody.Part file, @Part("name") RequestBody body);
+    @Multipart
     @POST("/upload")
     Call<ImageUploadResponse> imageUploadDynamic(
-            @Part List<MultipartBody.Part> files,
-            @Part("description") RequestBody desc
+            @Part("description") RequestBody desc,
+            @Part List<MultipartBody.Part> files
             );
 }

@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -168,6 +169,8 @@ public class roomActivity extends AppCompatActivity
     {
         if (requestCode == REQUEST_CODE) {
 
+            List<MultipartBody.Part> parts = new ArrayList<>();
+
             //클립보드에서 데이터 가져옴
             ClipData clipData = data.getClipData();
             Uri uri = data.getData();
@@ -186,25 +189,7 @@ public class roomActivity extends AppCompatActivity
             String imgpath = "";
             try {
 
-                //TODO :: 업로드 시에 여러번에 걸쳐서 업로드하면 오류가 생기는 듯 함
                 //이전 이미지와 같이 스택이 되어서 보내짐(메타데이터가, DB에)
-
-
-                //사진을 시간순대로 정렬(소트)
-                photoInfoList.sort(new Comparator<PhotoInfo>() {
-                    @Override
-                    public int compare(PhotoInfo arg0, PhotoInfo arg1) {
-                        // TODO Auto-generated method stub
-                        long t0 = arg0.time;
-                        long t1 = arg1.time;
-                        if (t0 == t1)
-                            return 0;
-                        else if (t0 > t1)
-                            return 1;
-                        else
-                            return -1;
-                    }
-                });
 
                 //데이터 작업쳐서 가져옴
                 for(int i=0; i<photoInfoList.size(); i++){
@@ -219,34 +204,54 @@ public class roomActivity extends AppCompatActivity
                     photoInfoList.get(i).orientation = temp.orientation;
                     if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
                         photoInfoList.remove(photoInfoList.get(i));
-                        continue;
                     }
+
+                }
+
+                //사진을 시간순대로 정렬(소트)
+                photoInfoList.sort(new Comparator<PhotoInfo>() {
+                    @Override
+                    public int compare(PhotoInfo arg0, PhotoInfo arg1) {
+                        // TODO Auto-generated method stub
+                        long t0 = arg0.time;
+                        long t1 = arg1.time;
+                        return Long.compare(t0, t1);
+                    }
+                });
+
+                for(int i=0; i<photoInfoList.size(); i++){
+
+                    //나중에 filename저장했다가 읽어오기만 하는걸로 변경 필요
+                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filename = filepath.substring(filepath.lastIndexOf("/")+1);
 
                     //데이터 서버측으로 전송할 준비
                     // 데이터를 모아서 하나의 JSON으로 보내야 함.
                     //filename 읽어서 바꿔줘야 함
-                    exifDataArrayList.add(new ExifData(filename,temp.longitude,temp.latitude,temp.time));
-
+                    exifDataArrayList.add(new ExifData(filename,photoInfoList.get(i).longitude,photoInfoList.get(i).latitude,photoInfoList.get(i).time));
+                    parts.add(prepareFilePart("photo",filepath));
                 }
 
-                service.exifUpload(exifDataArrayList).enqueue(new Callback<ExifUploadResponse>() {
+
+                //EXIF 업로드
+                service.exifUpload(exifDataArrayList).enqueue(new Callback<List<ExifUploadResponse>>() {
                     @Override
-                    public void onResponse(Call<ExifUploadResponse> call, Response<ExifUploadResponse> response) {
-                        ExifUploadResponse result = response.body();
+                    public void onResponse(Call<List<ExifUploadResponse>> call, Response<List<ExifUploadResponse>> response) {
+                        ExifUploadResponse result = response.body().get(0);
                         int code = result.getCode();
                         String message = result.getMessage();
 
                         if(code == 404){
-                            Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
+                           // Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
                         }else{
-                            Toast.makeText(roomActivity.this,message,Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(roomActivity.this,message,Toast.LENGTH_SHORT).show();
                             //업로드쪽 서비스 시작.
                         }
 
                     }
 
                     @Override
-                    public void onFailure(Call<ExifUploadResponse> call, Throwable t) {
+                    public void onFailure(Call<List<ExifUploadResponse>> call, Throwable t) {
                         Toast.makeText(roomActivity.this,"전송 오류 발생",Toast.LENGTH_SHORT).show();
                         Log.e("전송 오류 발생", t.getMessage());
                     }
@@ -255,38 +260,23 @@ public class roomActivity extends AppCompatActivity
 
 
 
-                //TODO : 파일 실제 전송(multer)
+                //TODO : 파일 실제 전송
 
-                List<MultipartBody.Part> parts = new ArrayList<>();
-                //part의 리스트
+                RequestBody description = createPart("a discription?");
 
-                parts.add(prepareFilePart("photo",photoInfoList.get(0).uri));
-
-                RequestBody description = RequestBody.create(
-                        okhttp3.MultipartBody.FORM, "photo");
-                //desc생성
-
-                service.imageUploadDynamic(parts,description).enqueue(new Callback<ImageUploadResponse>() {
+                service.imageUploadDynamic(description,parts).enqueue(new Callback<ImageUploadResponse> (){
                     @Override
                     public void onResponse(Call<ImageUploadResponse> call, Response<ImageUploadResponse> response) {
-                        int code = response.body().getCode();
-                        if(code == 500) {
-                            Toast.makeText(roomActivity.this,"업로드 서버측 오류 발생",Toast.LENGTH_SHORT).show();
-                        }else{
-                            Toast.makeText(roomActivity.this,"업로드 성공",Toast.LENGTH_SHORT).show();
-                        }
+                        Toast.makeText(roomActivity.this,"업로드 성공",Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onFailure(Call<ImageUploadResponse> call, Throwable t) {
                         Toast.makeText(roomActivity.this,"업로드 오류 발생",Toast.LENGTH_SHORT).show();
-                        Log.e("업로드 오류 발생", t.getMessage());
+                        Log.e("이미지 전송 오류 발생", t.getMessage());
                     }
                 });
 
-
-                //보낸 데이터 정리해보리기
-                exifDataArrayList.clear();
 
                 // 맵에 마커 찍는 부분
                 Bitmap src;
@@ -311,7 +301,26 @@ public class roomActivity extends AppCompatActivity
             } catch (IOException e) {
                 // Handle any errors
             }
+
+            //보낸 데이터 정리해보리기
+            exifDataArrayList.clear();
+            photoInfoList.clear();
+
+
         }
+    }
+
+    private RequestBody createPart(String descString){
+        return RequestBody.create(MultipartBody.FORM, descString);
+    }
+
+    private MultipartBody.Part prepareFilePart(String partName, String filepath){
+
+        File imgFile = new File(filepath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"),imgFile);
+
+        return MultipartBody.Part.createFormData(partName,imgFile.getName(),requestFile);
+
     }
 
     public PhotoInfo getExifInfo(InputStream filepath)
