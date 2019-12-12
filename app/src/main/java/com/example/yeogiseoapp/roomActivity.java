@@ -18,12 +18,33 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TabHost;
 import android.widget.Toast;
+
+import com.example.yeogiseoapp.data.ExifData;
+import com.example.yeogiseoapp.data.ExifUploadResponse;
+import com.example.yeogiseoapp.data.ExitGroupData;
+import com.example.yeogiseoapp.data.ExitGroupResponse;
+import com.example.yeogiseoapp.data.FindUserData;
+import com.example.yeogiseoapp.data.FindUserResponse;
+import com.example.yeogiseoapp.data.GroupMemberListData;
+import com.example.yeogiseoapp.data.GroupMemberListResponse;
+import com.example.yeogiseoapp.data.ImageUploadResponse;
+import com.example.yeogiseoapp.data.InviteData;
+import com.example.yeogiseoapp.data.InviteResponse;
+import com.example.yeogiseoapp.data.RemoveGroupData;
+import com.example.yeogiseoapp.data.RemoveGroupResponse;
+import com.google.android.material.navigation.NavigationView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
@@ -32,31 +53,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
-import com.example.yeogiseoapp.data.ExitGroupData;
-import com.example.yeogiseoapp.data.ExitGroupResponse;
-import com.example.yeogiseoapp.data.FindUserData;
-import com.example.yeogiseoapp.data.FindUserResponse;
-import com.example.yeogiseoapp.data.GroupData;
-import com.example.yeogiseoapp.data.GroupMemberListData;
-import com.example.yeogiseoapp.data.GroupMemberListResponse;
-import com.example.yeogiseoapp.data.GroupResponse;
-import com.example.yeogiseoapp.data.InviteData;
-import com.example.yeogiseoapp.data.InviteResponse;
-import com.example.yeogiseoapp.data.RemoveGroupData;
-import com.example.yeogiseoapp.data.RemoveGroupResponse;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
-
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -64,22 +63,24 @@ import retrofit2.Response;
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
+    private ServiceApi service = null;
+
     String email, info, username, room, gid, id;
     private static final int REQUEST_CODE = 200;
-    ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
+    ArrayList<PhotoInfo> photoInfoList = new ArrayList<>();
+    ArrayList<ExifData> exifDataArrayList = new ArrayList<>();
     chatFragment cf;
     mapFragment mf;
     popupinviteFragment inviteFragment;
     popuptogetherFragment pf;
     popupExitFragment exitFragment;
     popupGroupMemberFragment groupMemberFragment;
-    ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
+    ArrayList<Bitmap> smallPics = new ArrayList<>();
     NavigationView navigationView;
     boolean isDrawing;
     // 0 : No, 1 : Yes, 2 : Host
     int chkDrawstatus;
     public Paper paper;
-    ServiceApi service = null;
     String tempUid = null;
     ArrayList<String> groupMemberArrayList = new ArrayList<>();
 
@@ -98,6 +99,9 @@ public class roomActivity extends AppCompatActivity
         info = intent.getStringExtra("info");
         gid = intent.getStringExtra("gid");
         id = intent.getStringExtra("id");
+
+        //전송
+        service = RetrofitClient.getInstance().create(ServiceApi.class);
 
         cf.initChat();
 
@@ -160,6 +164,21 @@ public class roomActivity extends AppCompatActivity
                 || super.onSupportNavigateUp();
     }
 
+    private MultipartBody.Part prepareFilePart(String partName, Uri fileUri) {
+        // use the FileUtils to get the actual file by uri
+        File file = new File(fileUri.getPath());
+
+        // create RequestBody instance from file
+        RequestBody requestFile =
+                RequestBody.create(
+                        MediaType.parse(getContentResolver().getType(fileUri)),
+                        file
+                );
+
+        // MultipartBody.Part is used to send also the actual file name
+        return MultipartBody.Part.createFormData(partName, file.getName(), requestFile);
+    }
+
     public String getEmail(){
         return email;
     }
@@ -167,9 +186,12 @@ public class roomActivity extends AppCompatActivity
         return username;
     }
     public String getRoom() { return room; }
+
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         if (requestCode == REQUEST_CODE) {
+
+            List<MultipartBody.Part> parts = new ArrayList<>();
 
             ClipData clipData;
             if(data.getClipData() == null)
@@ -192,13 +214,15 @@ public class roomActivity extends AppCompatActivity
                 for(int i=0; i<photoInfoList.size(); i++){
                     in = getContentResolver().openInputStream(photoInfoList.get(i).uri);
                     temp = getExifInfo(in);
+
+                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filename = filepath.substring(filepath.lastIndexOf("/")+1);
                     photoInfoList.get(i).time = temp.time;
                     photoInfoList.get(i).longitude = temp.longitude;
                     photoInfoList.get(i).latitude = temp.latitude;
                     photoInfoList.get(i).orientation = temp.orientation;
                     if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
                         photoInfoList.remove(photoInfoList.get(i));
-                        continue;
                     }
                 }
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
@@ -207,15 +231,72 @@ public class roomActivity extends AppCompatActivity
                         // TODO Auto-generated method stub
                         long t0 = arg0.time;
                         long t1 = arg1.time;
-                        if (t0 == t1)
-                            return 0;
-                        else if (t0 > t1)
-                            return 1;
-                        else
-                            return -1;
+                        return Long.compare(t0, t1);
                     }
                 });
 
+                for(int i=0; i<photoInfoList.size(); i++){
+
+                    //나중에 filename저장했다가 읽어오기만 하는걸로 변경 필요
+                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filename = filepath.substring(filepath.lastIndexOf("/")+1);
+
+                    //데이터 서버측으로 전송할 준비
+                    // 데이터를 모아서 하나의 JSON으로 보내야 함.
+                    //filename 읽어서 바꿔줘야 함
+
+                    //TODO  보내는 정보에 내 클라이언트 정보(그룹ID, 유저ID 추가해서 보내야 함. 라우터측 작업도 필요)
+                    exifDataArrayList.add(new ExifData(filename,photoInfoList.get(i).longitude,photoInfoList.get(i).latitude,photoInfoList.get(i).time));
+                    parts.add(prepareFilePart("photo",filepath));
+                }
+
+
+
+                //EXIF 업로드
+                service.exifUpload(exifDataArrayList).enqueue(new Callback<List<ExifUploadResponse>>() {
+                    @Override
+                    public void onResponse(Call<List<ExifUploadResponse>> call, Response<List<ExifUploadResponse>> response) {
+                        ExifUploadResponse result = response.body().get(0);
+                        int code = result.getCode();
+                        String message = result.getMessage();
+
+                        if(code == 404){
+                           // Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
+                        }else{
+                            //Toast.makeText(roomActivity.this,message,Toast.LENGTH_SHORT).show();
+                            //업로드쪽 서비스 시작.
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<ExifUploadResponse>> call, Throwable t) {
+                        Toast.makeText(roomActivity.this,"전송 오류 발생",Toast.LENGTH_SHORT).show();
+                        Log.e("전송 오류 발생", t.getMessage());
+                    }
+                });
+
+
+
+
+                // 파일 실제 전송하는 부분
+                RequestBody description = createPart("a discription?");
+
+                service.imageUploadDynamic(description,parts).enqueue(new Callback<ImageUploadResponse> (){
+                    @Override
+                    public void onResponse(Call<ImageUploadResponse> call, Response<ImageUploadResponse> response) {
+                        Toast.makeText(roomActivity.this,"업로드 성공",Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ImageUploadResponse> call, Throwable t) {
+                        Toast.makeText(roomActivity.this,"업로드 오류 발생",Toast.LENGTH_SHORT).show();
+                        Log.e("이미지 전송 오류 발생", t.getMessage());
+                    }
+                });
+
+
+                // 맵에 마커 찍는 부분
                 Bitmap src;
                 Drawable drawable;
                 navigationView.getMenu().clear();
@@ -238,7 +319,26 @@ public class roomActivity extends AppCompatActivity
             } catch (IOException e) {
                 // Handle any errors
             }
+
+            //보낸 데이터 정리해보리기
+            exifDataArrayList.clear();
+            photoInfoList.clear();
+
+
         }
+    }
+
+    private RequestBody createPart(String descString){
+        return RequestBody.create(MultipartBody.FORM, descString);
+    }
+
+    private MultipartBody.Part prepareFilePart(String partName, String filepath){
+
+        File imgFile = new File(filepath);
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"),imgFile);
+
+        return MultipartBody.Part.createFormData(partName,imgFile.getName(),requestFile);
+
     }
 
     public PhotoInfo getExifInfo(InputStream filepath)
@@ -439,6 +539,7 @@ public class roomActivity extends AppCompatActivity
 
         ft.commit();
     }
+
     public void deleteFrag(View v){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();

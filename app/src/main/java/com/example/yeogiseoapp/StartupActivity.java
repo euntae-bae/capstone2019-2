@@ -1,12 +1,15 @@
 package com.example.yeogiseoapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
 import com.example.yeogiseoapp.ui.login.LoginActivity;
 
@@ -34,6 +37,7 @@ public class StartupActivity extends Activity {
             Log.i("autologin", "succeed");
             intent = new Intent(getApplicationContext(), HallActivity.class);
         }
+
 
         startActivity(intent);
     }

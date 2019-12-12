@@ -10,6 +10,10 @@ import com.example.yeogiseoapp.data.GroupInquiryData;
 import com.example.yeogiseoapp.data.GroupInquiryResponse;
 import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
+import com.example.yeogiseoapp.data.ExifData;
+import com.example.yeogiseoapp.data.ExifUploadResponse;
+import com.example.yeogiseoapp.data.ImageUploadResponse;
+import com.example.yeogiseoapp.data.LandMarkResponse;
 import com.example.yeogiseoapp.data.LoginData;
 import com.example.yeogiseoapp.data.LoginResponse;
 import com.example.yeogiseoapp.data.RegisterData;
@@ -21,11 +25,21 @@ import com.example.yeogiseoapp.data.RemoveGroupResponse;
 
 import java.util.List;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 public interface ServiceApi {
+
+    String URL = "ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com";
     @POST("/login")
     Call<LoginResponse> userLogin(@Body LoginData data);
     @POST("/register")
@@ -44,4 +58,20 @@ public interface ServiceApi {
     Call<GroupMemberListResponse> groupMemberList(@Body GroupMemberListData data);
     @POST("/remove-group")
     Call<RemoveGroupResponse> removeGroup(@Body RemoveGroupData data);
+    @POST("/exif")
+    Call<List<ExifUploadResponse>> exifUpload(@Body ArrayList<ExifData> data);
+    @Multipart
+    @POST("/upload")
+    Call<ImageUploadResponse> imageUpload(@Part MultipartBody.Part file, @Part("name") RequestBody body);
+    @Multipart
+    @POST("/upload")
+    Call<ImageUploadResponse> imageUploadDynamic(
+            @Part("description") RequestBody desc,
+            @Part List<MultipartBody.Part> files
+            );
+    @GET("/api")
+    Call<LandMarkResponse> getLandMark(@Body String path);
+
+
+
 }

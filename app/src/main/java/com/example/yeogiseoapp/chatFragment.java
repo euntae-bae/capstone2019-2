@@ -42,7 +42,7 @@ public class chatFragment extends Fragment {
         sendBtn = (Button)v.findViewById(R.id.sendbtn);
         editText = (EditText)v.findViewById(R.id.message);
         try {
-            mSocket = IO.socket("http://ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com:8806");
+            mSocket = IO.socket("http://ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com:8807");
         } catch(URISyntaxException e) {
             e.printStackTrace();
         }
