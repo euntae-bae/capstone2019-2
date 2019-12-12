@@ -38,17 +38,52 @@
         />
 
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        android:layout_marginLeft="-70dp"
-        app:headerLayout="@layout/nav_header_drawer"
-        app:menu="@menu/activity_drawer_drawer" >
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="400dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:fitsSystemWindows="true"
+            app:headerLayout="@layout/nav_header_drawer"
+            app:menu="@menu/activity_drawer_drawer" >
 
-    </com.google.android.material.navigation.NavigationView>
+            <RelativeLayout
+                android:layout_width="250dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="165dp"
+                android:padding="4px"
+                android:background="@drawable/picinfobg">
 
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:id="@+id/picinfoHeader"
+                    android:background="@drawable/side_picinfo_bar" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/picinfoHeader"
+                    android:id="@+id/pictureName"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="pictureName"
+                    android:textSize="20dp"/>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pictureName"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:id="@+id/picBodyImage"
+                    android:background="@drawable/common_google_signin_btn_icon_dark"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:id="@+id/picinfoTail"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/side_picinfo_bar" />
+            </RelativeLayout>
+
+        </com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
