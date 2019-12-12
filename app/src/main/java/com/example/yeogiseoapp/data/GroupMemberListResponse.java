@@ -11,6 +11,8 @@ public class GroupMemberListResponse {
     private int code;
     @SerializedName("message")
     private String message;
+    @SerializedName("count")
+    private int count;
     @SerializedName("list")
     private ArrayList<Object> list = new ArrayList<>();
 
@@ -18,6 +20,9 @@ public class GroupMemberListResponse {
         return code;
     }
     public String getMessage() { return message; }
+    public int getCount() {
+        return count;
+    }
     public ArrayList<Object> getList() { return list; }
 
     public String getListIndexEmail(int i){

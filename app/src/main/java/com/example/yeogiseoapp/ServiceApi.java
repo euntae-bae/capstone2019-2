@@ -16,6 +16,8 @@ import com.example.yeogiseoapp.data.RegisterData;
 import com.example.yeogiseoapp.data.RegisterResponse;
 import com.example.yeogiseoapp.data.ExitGroupData;
 import com.example.yeogiseoapp.data.ExitGroupResponse;
+import com.example.yeogiseoapp.data.RemoveGroupData;
+import com.example.yeogiseoapp.data.RemoveGroupResponse;
 
 import java.util.List;
 
@@ -40,5 +42,6 @@ public interface ServiceApi {
     Call<ExitGroupResponse> exitGroup(@Body ExitGroupData data);
     @POST("/group-member-list")
     Call<GroupMemberListResponse> groupMemberList(@Body GroupMemberListData data);
-
+    @POST("/remove-group")
+    Call<RemoveGroupResponse> removeGroup(@Body RemoveGroupData data);
 }

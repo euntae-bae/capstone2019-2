@@ -43,6 +43,8 @@ import com.example.yeogiseoapp.data.GroupMemberListResponse;
 import com.example.yeogiseoapp.data.GroupResponse;
 import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
+import com.example.yeogiseoapp.data.RemoveGroupData;
+import com.example.yeogiseoapp.data.RemoveGroupResponse;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -140,7 +142,7 @@ public class roomActivity extends AppCompatActivity
                 startActivityForResult(it, REQUEST_CODE);
                 return true;
             case R.id.action_list:
-                groupMemberList(new GroupMemberListData(gid));
+                groupMemberList(new GroupMemberListData(gid), true);
                 return true;
             case R.id.action_settings:
                 Toast.makeText(this, "Setting", Toast.LENGTH_SHORT).show();
@@ -478,6 +480,7 @@ public class roomActivity extends AppCompatActivity
     public void mExitOnClick(View v) {
         switch (v.getId()) {
             case R.id.popExitOkBtn:
+                groupMemberList(new GroupMemberListData(gid), false);
                 exitGroup(new ExitGroupData(gid, id));
                 exitFragment.dismissDialog();
                 goHall();
@@ -590,17 +593,46 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
-    private void groupMemberList(final GroupMemberListData data) {
+    private void removeGroup(final RemoveGroupData data) {
+        service.removeGroup(data).enqueue(new Callback<RemoveGroupResponse>() {
+            @Override
+            public void onResponse(Call<RemoveGroupResponse> call, Response<RemoveGroupResponse> response) {
+                RemoveGroupResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+
+                if (code == 201) {
+                    // 그룹 생성 성공
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    // 그룹 생성 실패
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RemoveGroupResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "그룹 나가기 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 나가기 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
+    private void groupMemberList(final GroupMemberListData data, final boolean isOpenPopup) {
         service.groupMemberList(data).enqueue(new Callback<GroupMemberListResponse>() {
             @Override
             public void onResponse(Call<GroupMemberListResponse> call, Response<GroupMemberListResponse> response) {
                 GroupMemberListResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
                 int code = result.getCode();
                 String message = result.getMessage();
-
+                int count = result.getCount();
                 if (code == 201) {
                     // 그룹 생성 성공
-                    openGroupMemberPopup(result.getNameList(), result.getEmailList());
+                    if(isOpenPopup)
+                        openGroupMemberPopup(result.getNameList(), result.getEmailList());
+                    else if(count == 1)
+                        removeGroup(new RemoveGroupData(data.getGroupID()));
                 }
                 else {
                     // 그룹 생성 실패
