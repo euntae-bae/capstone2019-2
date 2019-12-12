@@ -6,6 +6,7 @@ public class listViewItem {
     private Drawable iconDrawble;
     private String roomStr ;
     private String infoStr ;
+    private String groupID;
 
     public void setIcon(Drawable icon) {
         iconDrawble = icon;
@@ -17,6 +18,9 @@ public class listViewItem {
     public void setInfo(String desc) {
         infoStr = desc ;
     }
+    public void setGroupID(String gid) {
+        groupID = gid ;
+    }
 
     public Drawable getIcon() {
         return iconDrawble;
@@ -27,5 +31,8 @@ public class listViewItem {
     }
     public String getInfo() {
         return this.infoStr;
+    }
+    public String getGroupID() {
+        return this.groupID;
     }
 }

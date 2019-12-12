@@ -13,8 +13,19 @@
         android:title="Upload"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_list"
+        android:orderInCategory="100"
+        android:title="Member List"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_exit"
+        android:orderInCategory="100"
+        android:title="Exit"
         app:showAsAction="never" />
 </menu>

@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TabHost;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,14 +33,21 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.example.yeogiseoapp.data.ExitGroupData;
+import com.example.yeogiseoapp.data.ExitGroupResponse;
 import com.example.yeogiseoapp.data.FindUserData;
 import com.example.yeogiseoapp.data.FindUserResponse;
 import com.example.yeogiseoapp.data.GroupData;
+import com.example.yeogiseoapp.data.GroupMemberListData;
+import com.example.yeogiseoapp.data.GroupMemberListResponse;
 import com.example.yeogiseoapp.data.GroupResponse;
 import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -54,13 +62,14 @@ import retrofit2.Response;
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
-    String email, info, username, room, gid;
+    String email, info, username, room, gid, id;
     private static final int REQUEST_CODE = 200;
     ArrayList<PhotoInfo> photoInfoList = new ArrayList<PhotoInfo>();
     chatFragment cf;
     mapFragment mf;
     popupinviteFragment inviteFragment;
     popuptogetherFragment pf;
+    popupExitFragment exitFragment;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
     boolean isDrawing;
@@ -69,6 +78,7 @@ public class roomActivity extends AppCompatActivity
     public Paper paper;
     ServiceApi service = null;
     String tempUid = null;
+    ArrayList<String> groupMemberArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +94,7 @@ public class roomActivity extends AppCompatActivity
         room = intent.getStringExtra("room");
         info = intent.getStringExtra("info");
         gid = intent.getStringExtra("gid");
-
+        id = intent.getStringExtra("id");
 
         cf.initChat();
 
@@ -128,8 +138,14 @@ public class roomActivity extends AppCompatActivity
                 it.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 startActivityForResult(it, REQUEST_CODE);
                 return true;
+            case R.id.action_list:
+                groupMemberList(new GroupMemberListData(gid));
+                return true;
             case R.id.action_settings:
                 Toast.makeText(this, "Setting", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.action_exit:
+                openExitPopup();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -396,6 +412,12 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    public void openExitPopup(){
+        popupExitFragment dialog = popupExitFragment.newInstance();
+        exitFragment = dialog;
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
     public void sendAllow(){ cf.emitTogether(); }
     public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
     public void openOverlay(int i){
@@ -437,12 +459,24 @@ public class roomActivity extends AppCompatActivity
             case R.id.popInviteOkBtn:
                 String inviteEmail = inviteFragment.getInviteEmail();
                 findUserid(new FindUserData(inviteEmail));
-
-
                 break;
 
             case R.id.popInviteNoBtn:
                 inviteFragment.dismissDialog();
+                break;
+        }
+    }
+
+    public void mExitOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.popExitOkBtn:
+                exitGroup(new ExitGroupData(gid, id));
+                exitFragment.dismissDialog();
+                goHall();
+                break;
+
+            case R.id.popExitNoBtn:
+                exitFragment.dismissDialog();
                 break;
         }
     }
@@ -514,5 +548,67 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    private void exitGroup(final ExitGroupData data) {
+        service.exitGroup(data).enqueue(new Callback<ExitGroupResponse>() {
+            @Override
+            public void onResponse(Call<ExitGroupResponse> call, Response<ExitGroupResponse> response) {
+                ExitGroupResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+
+                if (code == 201) {
+                    // 그룹 생성 성공
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    // 그룹 생성 실패
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ExitGroupResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "그룹 나가기 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 나가기 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
+    private void groupMemberList(final GroupMemberListData data) {
+        service.groupMemberList(data).enqueue(new Callback<GroupMemberListResponse>() {
+            @Override
+            public void onResponse(Call<GroupMemberListResponse> call, Response<GroupMemberListResponse> response) {
+                GroupMemberListResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+
+                if (code == 201) {
+                    // 그룹 생성 성공
+                    showToast(String.valueOf(result.getListIndex(0)));
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    // 그룹 생성 실패
+                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GroupMemberListResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "그룹 나가기 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 나가기 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
     public void setTempUid(String uid){ tempUid = uid; }
+
+    public void showToast(String s){
+        Toast.makeText(roomActivity.this, s, Toast.LENGTH_SHORT).show();
+    }
+
+    public void goHall(){
+        Intent intent = new Intent(this, HallActivity.class);
+        startActivity(intent);
+    }
 }

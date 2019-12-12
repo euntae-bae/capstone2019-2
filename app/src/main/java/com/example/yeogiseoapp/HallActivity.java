@@ -37,7 +37,7 @@ public class HallActivity extends AppCompatActivity {
 
     View layout;
     RoomAdapter adapter;
-    String email, username, id, gid;
+    String email, username, uid;
     private SharedPreferences sp;
     private ServiceApi service = null;
     EditText groupName;
@@ -56,9 +56,10 @@ public class HallActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         email = sp.getString("loggedinEmail", null);
         username = sp.getString("loggedinUsername", null);
-        id = sp.getString("loggedinId", null);
+        uid = sp.getString("loggedinId", null);
         ListView listview;
-        inquiryGroup(new GroupInquiryData(id));
+        inquiryGroup(new GroupInquiryData(uid));
+
 
         adapter = new RoomAdapter();
         listview = (ListView)findViewById(R.id.listview);
@@ -75,6 +76,7 @@ public class HallActivity extends AppCompatActivity {
                 listViewItem item = (listViewItem)parent.getItemAtPosition(position);
                 String room = item.getRoom();
                 String info = item.getInfo();
+                String gid = item.getGroupID();
 
                 Intent intent = new Intent(HallActivity.this, roomActivity.class);
                 intent.putExtra("email", email);
@@ -82,6 +84,7 @@ public class HallActivity extends AppCompatActivity {
                 intent.putExtra("room", room);
                 intent.putExtra("info", info);
                 intent.putExtra("gid", gid);
+                intent.putExtra("id", uid);
                 startActivity(intent);
 
             }
@@ -100,7 +103,7 @@ public class HallActivity extends AppCompatActivity {
                     int size = result.getSize();
                     result.setGroupArr();
                     for(int i=0; i<size; i++){
-                        makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i));
+                        makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i), result.getIndexGroupID(i));
                     }
                 }
                 else {
@@ -134,8 +137,7 @@ public class HallActivity extends AppCompatActivity {
                 Toast.makeText(HallActivity.this, message, Toast.LENGTH_SHORT).show();
                 if (code == 201) {
                     // 그룹 생성 성공
-                    gid = groupID;
-                    makeRoom(data.getGroupName(), username);
+                    makeRoom(data.getGroupName(), username, groupID);
                 }
                 else {
                     // 그룹 생성 실패
@@ -151,8 +153,8 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
-    public void makeRoom(String title, String creator){
-        adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator);
+    public void makeRoom(String title, String creator, String gid){
+        adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator, gid);
         Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
         adapter.notifyDataSetChanged();
@@ -185,7 +187,7 @@ public class HallActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.popMakeGroupOkBtn:
                 String gn = mf.getGroupName();
-                makeGroup(new GroupData(id, gn));
+                makeGroup(new GroupData(uid, gn));
                 mf.dismissDialog();
                 break;
 
@@ -193,5 +195,9 @@ public class HallActivity extends AppCompatActivity {
                 mf.dismissDialog();
                 break;
         }
+    }
+
+    public void showToast(String s){
+        Toast.makeText(HallActivity.this, s, Toast.LENGTH_SHORT).show();
     }
 }

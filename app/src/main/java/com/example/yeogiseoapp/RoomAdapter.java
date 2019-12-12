@@ -66,12 +66,13 @@ public class RoomAdapter extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, String room, String info) {
+    public void addItem(Drawable icon, String room, String info, String gid) {
         listViewItem item = new listViewItem();
 
         item.setIcon(icon);
         item.setRoom(room);
         item.setInfo(info);
+        item.setGroupID(gid);
 
         listViewItemList.add(item);
     }
