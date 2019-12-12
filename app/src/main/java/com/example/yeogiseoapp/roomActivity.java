@@ -70,6 +70,7 @@ public class roomActivity extends AppCompatActivity
     popupinviteFragment inviteFragment;
     popuptogetherFragment pf;
     popupExitFragment exitFragment;
+    popupGroupMemberFragment groupMemberFragment;
     ArrayList<Bitmap> smallPics = new ArrayList<Bitmap>();
     NavigationView navigationView;
     boolean isDrawing;
@@ -418,6 +419,13 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    public void openGroupMemberPopup(ArrayList<String> ns, ArrayList<String> es){
+        popupGroupMemberFragment dialog = popupGroupMemberFragment.newInstance();
+        groupMemberFragment = dialog;
+        groupMemberFragment.setList(ns, es);
+        dialog.show(getSupportFragmentManager(), "dialog");
+    }
+
     public void sendAllow(){ cf.emitTogether(); }
     public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
     public void openOverlay(int i){
@@ -477,6 +485,14 @@ public class roomActivity extends AppCompatActivity
 
             case R.id.popExitNoBtn:
                 exitFragment.dismissDialog();
+                break;
+        }
+    }
+
+    public void mGroupMemberOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.popGroupMemberOkBtn:
+                groupMemberFragment.dismissDialog();
                 break;
         }
     }
@@ -584,8 +600,7 @@ public class roomActivity extends AppCompatActivity
 
                 if (code == 201) {
                     // 그룹 생성 성공
-                    showToast(String.valueOf(result.getListIndex(0)));
-                    Toast.makeText(roomActivity.this, message, Toast.LENGTH_SHORT).show();
+                    openGroupMemberPopup(result.getNameList(), result.getEmailList());
                 }
                 else {
                     // 그룹 생성 실패
@@ -595,8 +610,8 @@ public class roomActivity extends AppCompatActivity
 
             @Override
             public void onFailure(Call<GroupMemberListResponse> call, Throwable t) {
-                Toast.makeText(roomActivity.this, "그룹 나가기 오류 발생", Toast.LENGTH_SHORT).show();
-                Log.e("그룹 나가기 과정 오류 발생", t.getMessage());
+                Toast.makeText(roomActivity.this, "그룹 멤버 조회 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 멤버 조회 과정 오류 발생", t.getMessage());
             }
         });
     }

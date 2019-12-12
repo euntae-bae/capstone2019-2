@@ -10,19 +10,19 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class RoomAdapter extends BaseAdapter {
+public class GroupMemberAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
-    private ArrayList<listViewItem> listViewItemList = new ArrayList<listViewItem>() ;
+    private ArrayList<GroupMemberItem> groupMemberList = new ArrayList<GroupMemberItem>() ;
 
     // ListViewAdapter의 생성자
-    public RoomAdapter() {
+    public GroupMemberAdapter() {
 
     }
 
     // Adapter에 사용되는 데이터의 개수를 리턴. : 필수 구현
     @Override
     public int getCount() {
-        return listViewItemList.size() ;
+        return groupMemberList.size() ;
     }
 
     // position에 위치한 데이터를 화면에 출력하는데 사용될 View를 리턴. : 필수 구현
@@ -34,21 +34,19 @@ public class RoomAdapter extends BaseAdapter {
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.hall_listview_attribute, parent, false);
+            convertView = inflater.inflate(R.layout.popup_groupmember_attribute, parent, false);
         }
 
         // 화면에 표시될 View(Layout이 inflate된)으로부터 위젯에 대한 참조 획득
-        ImageView iconImageView = (ImageView) convertView.findViewById(R.id.roomImg) ;
-        TextView roomTextView = (TextView) convertView.findViewById(R.id.roomName) ;
-        TextView infoTextView = (TextView) convertView.findViewById(R.id.info) ;
+        TextView name = (TextView) convertView.findViewById(R.id.groupMemberListName) ;
+        TextView email = (TextView) convertView.findViewById(R.id.groupMemberListEmail) ;
 
         // Data Set(listViewItemList)에서 position에 위치한 데이터 참조 획득
-        listViewItem listViewItem = listViewItemList.get(position);
+        GroupMemberItem groupMemberInfo = groupMemberList.get(position);
 
         // 아이템 내 각 위젯에 데이터 반영
-        iconImageView.setImageDrawable(listViewItem.getIcon());
-        roomTextView.setText(listViewItem.getRoom());
-        infoTextView.setText(listViewItem.getInfo());
+        name.setText(groupMemberInfo.getName());
+        email.setText(groupMemberInfo.getEmail());
 
         return convertView;
     }
@@ -62,18 +60,16 @@ public class RoomAdapter extends BaseAdapter {
     // 지정한 위치(position)에 있는 데이터 리턴 : 필수 구현
     @Override
     public Object getItem(int position) {
-        return listViewItemList.get(position) ;
+        return groupMemberList.get(position) ;
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, String room, String info, String gid) {
-        listViewItem item = new listViewItem();
+    public void addItem(String n, String e) {
+        GroupMemberItem item = new GroupMemberItem();
 
-        item.setIcon(icon);
-        item.setRoom(room);
-        item.setInfo(info);
-        item.setGroupID(gid);
+        item.setName(n);
+        item.setEmail(e);
 
-        listViewItemList.add(item);
+        groupMemberList.add(item);
     }
 }

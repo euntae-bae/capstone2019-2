@@ -1,6 +1,5 @@
 package com.example.yeogiseoapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,10 +23,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +32,7 @@ import retrofit2.Response;
 public class HallActivity extends AppCompatActivity {
 
     View layout;
-    RoomAdapter adapter;
+    GroupAdapter adapter;
     String email, username, uid;
     private SharedPreferences sp;
     private ServiceApi service = null;
@@ -61,7 +57,7 @@ public class HallActivity extends AppCompatActivity {
         inquiryGroup(new GroupInquiryData(uid));
 
 
-        adapter = new RoomAdapter();
+        adapter = new GroupAdapter();
         listview = (ListView)findViewById(R.id.listview);
         listview.setAdapter(adapter);
 
@@ -73,7 +69,7 @@ public class HallActivity extends AppCompatActivity {
         });
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
-                listViewItem item = (listViewItem)parent.getItemAtPosition(position);
+                GroupInfoItem item = (GroupInfoItem)parent.getItemAtPosition(position);
                 String room = item.getRoom();
                 String info = item.getInfo();
                 String gid = item.getGroupID();

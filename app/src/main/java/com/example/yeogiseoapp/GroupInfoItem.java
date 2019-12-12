@@ -2,7 +2,7 @@ package com.example.yeogiseoapp;
 
 import android.graphics.drawable.Drawable;
 
-public class listViewItem {
+public class GroupInfoItem {
     private Drawable iconDrawble;
     private String roomStr ;
     private String infoStr ;
