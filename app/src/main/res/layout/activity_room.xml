@@ -40,7 +40,7 @@
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/nav_view"
-            android:layout_width="400dp"
+            android:layout_width="350dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:fitsSystemWindows="true"
@@ -48,7 +48,7 @@
             app:menu="@menu/activity_drawer_drawer" >
 
             <RelativeLayout
-                android:layout_width="250dp"
+                android:layout_width="200dp"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="165dp"
                 android:padding="4px"
@@ -58,7 +58,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:id="@+id/picinfoHeader"
-                    android:background="@drawable/side_picinfo_bar" />
+                    android:background="@drawable/header_bar2"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -72,16 +72,53 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/pictureName"
+                    android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/picinfo_vertical_spacing"
                     android:id="@+id/picBodyImage"
                     android:background="@drawable/common_google_signin_btn_icon_dark"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/picBodyImage"
+                    android:id="@+id/pictureTime"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="pictureTime"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pictureTime"
+                    android:id="@+id/pictureLatitude"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="pictureLatitude"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pictureLatitude"
+                    android:id="@+id/pictureLongitude"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="pictureLongitude"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pictureLongitude"
+                    android:id="@+id/pictureComment"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="Comment"
+                    android:textSize="15dp"/>
 
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:id="@+id/picinfoTail"
                     android:layout_alignParentBottom="true"
-                    android:background="@drawable/side_picinfo_bar" />
+                    android:background="@drawable/tail_bar2"/>
             </RelativeLayout>
 
         </com.google.android.material.navigation.NavigationView>

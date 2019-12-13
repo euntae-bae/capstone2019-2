@@ -18,13 +18,17 @@ import java.io.InputStream;
 
 public class PhotoInfo {
     Uri uri;
+    int id;
+    String name = "name";
     long time;
     float latitude;
     float longitude;
     int orientation;
+    String comment = "comment";
 
     PhotoInfo(){
         uri = null;
+        id = -1;
         time = -1;
         latitude = -1;
         longitude = -1;
@@ -33,6 +37,7 @@ public class PhotoInfo {
 
     PhotoInfo(Uri u){
         uri = u;
+        id = -1;
         time = -1;
         latitude = -1;
         longitude = -1;

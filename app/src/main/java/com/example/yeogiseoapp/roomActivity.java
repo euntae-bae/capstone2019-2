@@ -215,15 +215,10 @@ public class roomActivity extends AppCompatActivity
                             return -1;
                     }
                 });
-
-                Bitmap bigOne, src;
                 Drawable drawable;
                 navigationView.getMenu().clear();
                 for(int i=0; i<photoInfoList.size(); i++){
-                    cf.sendStr(username, String.valueOf(photoInfoList.get(i).time) + '\n'
-                            + String.valueOf(photoInfoList.get(i).latitude) + '\n'
-                            + String.valueOf(photoInfoList.get(i).longitude));
-
+                    photoInfoList.get(i).id = i;
 
                     drawable = new BitmapDrawable(this.getResources(), photoInfoList.get(i).getRotatedBitmap(this, 130, 87));
                     navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
@@ -277,14 +272,24 @@ public class roomActivity extends AppCompatActivity
         }
 
         n = Integer.parseInt(temp);
+        n--;
         //mf.moveCamera(mf.markers.get(n-1));
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ImageView picImgView = (ImageView)findViewById(R.id.picBodyImage);
         TextView picNameTextView = (TextView) findViewById(R.id.pictureName);
+        TextView picTimeTextView = (TextView) findViewById(R.id.pictureTime);
+        TextView picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
+        TextView picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
+        TextView picCommentTextView = (TextView) findViewById(R.id.pictureComment);
 
-        picImgView.setImageBitmap(photoInfoList.get(n-1).getRotatedBitmap(this, dpToPx(this, 100), dpToPx(this, 80)));
-        picNameTextView.setText(id);
+
+        picImgView.setImageBitmap(photoInfoList.get(n).getRotatedBitmap(this, dpToPx(this, 100), dpToPx(this, 80)));
+        picNameTextView.setText(photoInfoList.get(n).name);
+        picTimeTextView.setText("Time : "+String.valueOf(photoInfoList.get(n).time));
+        picLatitudeTextView.setText("Latitude : "+String.valueOf(photoInfoList.get(n).latitude));
+        picLongitudeTextView.setText("Longitude : "+String.valueOf(photoInfoList.get(n).longitude));
+        picCommentTextView.setText("Comment : "+photoInfoList.get(n).comment);
 
         return true;
     }
