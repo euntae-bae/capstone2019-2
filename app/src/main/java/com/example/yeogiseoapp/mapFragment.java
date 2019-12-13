@@ -12,12 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.example.yeogiseoapp.data.ScheduleData;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -124,19 +127,10 @@ public class mapFragment extends Fragment
         mMap = googleMap;
         LatLng INHA = new LatLng(37.450606, 126.657225);
 
-        MarkerOptions markerOptions = new MarkerOptions();
-
-        markerOptions.position(INHA);
-
-        markerOptions.title("인하대");
-
-        markerOptions.snippet("하이테크");
-
-        googleMap.addMarker(markerOptions);
-
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(INHA));
 
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+        ((roomActivity)getActivity()).initSchedule(new ScheduleData(((roomActivity)getActivity()).getGid()));
     }
 
     public void makeMarker(float latitude, float longitude, Bitmap img)
@@ -152,6 +146,8 @@ public class mapFragment extends Fragment
 
         if(img != null)
             markerOptions.icon(BitmapDescriptorFactory.fromBitmap(img));
+        else
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
         mMap.addMarker(markerOptions);
 

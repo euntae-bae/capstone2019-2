@@ -4,6 +4,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -32,6 +33,9 @@ import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
 import com.example.yeogiseoapp.data.RemoveGroupData;
 import com.example.yeogiseoapp.data.RemoveGroupResponse;
+import com.example.yeogiseoapp.data.ScheduleData;
+import com.example.yeogiseoapp.data.ScheduleResponse;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
@@ -219,9 +223,6 @@ public class roomActivity extends AppCompatActivity
                     if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
                         photoInfoList.remove(photoInfoList.get(i));
                     }
-                    if(photoInfoList.get(i).longitude == -1){
-                        photoInfoList.remove(i);
-                    }
                 }
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
                     @Override
@@ -294,18 +295,9 @@ public class roomActivity extends AppCompatActivity
 
 
                 // 맵에 마커 찍는 부분
-                Drawable drawable;
                 navigationView.getMenu().clear();
-                for(int i=0; i<photoInfoList.size(); i++){
-                    photoInfoList.get(i).id = i;
+                makeMarkerByPhotoList(true);
 
-                    drawable = new BitmapDrawable(this.getResources(), photoInfoList.get(i).getRotatedBitmap(this, 130, 87));
-                    navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
-
-                    if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
-                        mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, photoInfoList.get(i).getRotatedBitmap(this, 130, 87));
-                }
-                mf.drawPath();
             } catch (IOException e) {
                 // Handle any errors
             }
@@ -316,6 +308,25 @@ public class roomActivity extends AppCompatActivity
 
 
         }
+    }
+
+    public void makeMarkerByPhotoList(boolean isUri){
+        Drawable drawable;
+        Bitmap pic;
+        for(int i=0; i<photoInfoList.size(); i++){
+            photoInfoList.get(i).id = i;
+
+            drawable = getDrawable(R.drawable.ic_menu_camera);
+            navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
+
+            if(isUri)
+                pic = photoInfoList.get(i).getRotatedBitmap(this, 130, 87);
+            else
+                pic = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_camera);
+            if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
+                mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, pic);
+        }
+        mf.drawPath();
     }
 
     private RequestBody createPart(String descString){
@@ -505,6 +516,7 @@ public class roomActivity extends AppCompatActivity
     public boolean getIsDrawing(){ return isDrawing; }
     public void emitStopDrawing(){ cf.emitStop(); }
     public void stopDrawing(){ paper.chkDrawing = false; }
+    public String getGid() { return gid; }
 
     private void inviteUser(final InviteData data) {
         service.invite(data).enqueue(new Callback<InviteResponse>() {
@@ -638,6 +650,36 @@ public class roomActivity extends AppCompatActivity
             public void onFailure(Call<GroupMemberListResponse> call, Throwable t) {
                 Toast.makeText(roomActivity.this, "그룹 멤버 조회 오류 발생", Toast.LENGTH_SHORT).show();
                 Log.e("그룹 멤버 조회 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
+    public void initSchedule(final ScheduleData data) {
+        service.getSchedule(data).enqueue(new Callback<ScheduleResponse>() {
+            @Override
+            public void onResponse(Call<ScheduleResponse> call, Response<ScheduleResponse> response) {
+                ScheduleResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+                int count = result.getCount();
+                if (code == 201) {
+                    // 스케쥴 생성 성공
+
+                    for(int i=0; i<count; i++){
+                        PhotoInfo p = new PhotoInfo();
+                        p.time = result.getListIndexTime(i);
+                        p.latitude = result.getListIndexLatitude(i);
+                        p.longitude = result.getListIndexLongitude(i);
+                        photoInfoList.add(p);
+                    }
+                    makeMarkerByPhotoList(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ScheduleResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "일정 초기화 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("일정 초기화 과정 오류 발생", t.getMessage());
             }
         });
     }

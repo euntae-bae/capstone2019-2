@@ -147,26 +147,30 @@ public class PhotoInfo {
     public Bitmap decodeSampledBitmapFromUri(Context context, Uri imageUri, int reqWidth, int reqHeight) {
         Bitmap bitmap = null;
         try {
-            // Get input stream of the image
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            InputStream iStream = context.getContentResolver().openInputStream(imageUri);
+            if(uri != null) {
+                // Get input stream of the image
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                InputStream iStream = context.getContentResolver().openInputStream(imageUri);
 
-            // First decode with inJustDecodeBounds=true to check dimensions
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(iStream, null, options);
-            if (iStream != null) {
-                iStream.close();
-            }
-            iStream = context.getContentResolver().openInputStream(imageUri);
+                // First decode with inJustDecodeBounds=true to check dimensions
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(iStream, null, options);
+                if (iStream != null) {
+                    iStream.close();
+                }
+                iStream = context.getContentResolver().openInputStream(imageUri);
 
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+                // Calculate inSampleSize
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-            bitmap = BitmapFactory.decodeStream(iStream, null, options);
-            if (iStream != null) {
-                iStream.close();
+                // Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false;
+                bitmap = BitmapFactory.decodeStream(iStream, null, options);
+                if (iStream != null) {
+                    iStream.close();
+                }
+            }else{
+                bitmap = BitmapFactory.decodeResource((context).getResources(), R.drawable.ic_menu_camera);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

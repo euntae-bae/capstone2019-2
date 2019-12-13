@@ -22,6 +22,8 @@ import com.example.yeogiseoapp.data.ExitGroupData;
 import com.example.yeogiseoapp.data.ExitGroupResponse;
 import com.example.yeogiseoapp.data.RemoveGroupData;
 import com.example.yeogiseoapp.data.RemoveGroupResponse;
+import com.example.yeogiseoapp.data.ScheduleData;
+import com.example.yeogiseoapp.data.ScheduleResponse;
 
 import java.util.List;
 
@@ -72,6 +74,7 @@ public interface ServiceApi {
     @GET("/api")
     Call<LandMarkResponse> getLandMark(@Body String path);
 
-
+    @POST("/schedule")
+    Call<ScheduleResponse> getSchedule(@Body ScheduleData data);
 
 }
