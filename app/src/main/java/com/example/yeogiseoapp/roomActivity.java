@@ -228,7 +228,6 @@ public class roomActivity extends AppCompatActivity
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
                     @Override
                     public int compare(PhotoInfo arg0, PhotoInfo arg1) {
-                        // TODO Auto-generated method stub
                         long t0 = arg0.time;
                         long t1 = arg1.time;
                         return Long.compare(t0, t1);
@@ -246,7 +245,7 @@ public class roomActivity extends AppCompatActivity
                     //filename 읽어서 바꿔줘야 함
 
                     //TODO  보내는 정보에 내 클라이언트 정보(그룹ID, 유저ID 추가해서 보내야 함. 라우터측 작업도 필요)
-                    exifDataArrayList.add(new ExifData(filename,photoInfoList.get(i).longitude,photoInfoList.get(i).latitude,photoInfoList.get(i).time));
+                    exifDataArrayList.add(new ExifData(filename,photoInfoList.get(i).longitude,photoInfoList.get(i).latitude,photoInfoList.get(i).time,id,gid));
                     parts.add(prepareFilePart("photo",filepath));
                 }
 
@@ -280,7 +279,7 @@ public class roomActivity extends AppCompatActivity
 
 
                 // 파일 실제 전송하는 부분
-                RequestBody description = createPart("a discription?");
+                RequestBody description = createPart(gid);
 
                 service.imageUploadDynamic(description,parts).enqueue(new Callback<ImageUploadResponse> (){
                     @Override
