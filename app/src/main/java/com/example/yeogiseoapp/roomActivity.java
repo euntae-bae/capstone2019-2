@@ -219,6 +219,9 @@ public class roomActivity extends AppCompatActivity
                     if(photoInfoList.get(i).latitude == -1 || photoInfoList.get(i).longitude == -1){
                         photoInfoList.remove(photoInfoList.get(i));
                     }
+                    if(photoInfoList.get(i).longitude == -1){
+                        photoInfoList.remove(i);
+                    }
                 }
                 photoInfoList.sort(new Comparator<PhotoInfo>() {
                     @Override
