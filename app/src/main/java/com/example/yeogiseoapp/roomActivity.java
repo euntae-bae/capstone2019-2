@@ -1,13 +1,9 @@
 package com.example.yeogiseoapp;
 
-import android.app.Activity;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -15,9 +11,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.yeogiseoapp.data.ExifData;
@@ -36,7 +35,6 @@ import com.example.yeogiseoapp.data.RemoveGroupResponse;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,7 +43,6 @@ import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -82,7 +79,6 @@ public class roomActivity extends AppCompatActivity
     int chkDrawstatus;
     public Paper paper;
     String tempUid = null;
-    ArrayList<String> groupMemberArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,7 +190,7 @@ public class roomActivity extends AppCompatActivity
             List<MultipartBody.Part> parts = new ArrayList<>();
 
             ClipData clipData;
-            if(data.getClipData() == null)
+            if(data.getClipData() == null && data.getData() == null)
                 return ;
             else
                 clipData = data.getClipData();
@@ -207,7 +203,6 @@ public class roomActivity extends AppCompatActivity
             }else if(uri != null) {
                 photoInfoList.add(new PhotoInfo(uri));
             }
-
             InputStream in = null;
             String imgpath = "";
             try {
@@ -215,7 +210,7 @@ public class roomActivity extends AppCompatActivity
                     in = getContentResolver().openInputStream(photoInfoList.get(i).uri);
                     temp = getExifInfo(in);
 
-                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filepath = photoInfoList.get(i).getRealPathFromURI(this);
                     String filename = filepath.substring(filepath.lastIndexOf("/")+1);
                     photoInfoList.get(i).time = temp.time;
                     photoInfoList.get(i).longitude = temp.longitude;
@@ -237,7 +232,7 @@ public class roomActivity extends AppCompatActivity
                 for(int i=0; i<photoInfoList.size(); i++){
 
                     //나중에 filename저장했다가 읽어오기만 하는걸로 변경 필요
-                    String filepath = getRealPathFromURI(photoInfoList.get(i).uri,this);
+                    String filepath = photoInfoList.get(i).getRealPathFromURI(this);
                     String filename = filepath.substring(filepath.lastIndexOf("/")+1);
 
                     //데이터 서버측으로 전송할 준비
@@ -296,23 +291,16 @@ public class roomActivity extends AppCompatActivity
 
 
                 // 맵에 마커 찍는 부분
-                Bitmap src;
                 Drawable drawable;
                 navigationView.getMenu().clear();
                 for(int i=0; i<photoInfoList.size(); i++){
-                    cf.sendStr(username, String.valueOf(photoInfoList.get(i).time) + '\n'
-                            + String.valueOf(photoInfoList.get(i).latitude) + '\n'
-                            + String.valueOf(photoInfoList.get(i).longitude));
+                    photoInfoList.get(i).id = i;
 
-                    src = rotateBitmap(decodeSampledBitmapFromUri(this, photoInfoList.get(i).uri, 130, 87), photoInfoList.get(i).orientation);
-
-                    smallPics.add(src);
-
-                    drawable = new BitmapDrawable(this.getResources(), src);
+                    drawable = new BitmapDrawable(this.getResources(), photoInfoList.get(i).getRotatedBitmap(this, 130, 87));
                     navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
 
                     if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
-                        mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, src);
+                        mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, photoInfoList.get(i).getRotatedBitmap(this, 130, 87));
                 }
                 mf.drawPath();
             } catch (IOException e) {
@@ -364,78 +352,9 @@ public class roomActivity extends AppCompatActivity
         return attr;
     }
 
-    public String getRealPathFromURI(Uri contentURI, Activity context) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        @SuppressWarnings("deprecation")
-        Cursor cursor = context.managedQuery(contentURI, projection, null,
-                null, null);
-        if (cursor == null)
-            return null;
-        int column_index = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        if (cursor.moveToFirst()) {
-            String s = cursor.getString(column_index);
-            // cursor.close();
-            return s;
-        }
-        // cursor.close();
-        return null;
-    }
 
-    private static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
 
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
-
-    public static Bitmap decodeSampledBitmapFromUri(Context context, Uri imageUri, int reqWidth, int reqHeight) throws FileNotFoundException {
-        Bitmap bitmap = null;
-        try {
-            // Get input stream of the image
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            InputStream iStream = context.getContentResolver().openInputStream(imageUri);
-
-            // First decode with inJustDecodeBounds=true to check dimensions
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(iStream, null, options);
-            if (iStream != null) {
-                iStream.close();
-            }
-            iStream = context.getContentResolver().openInputStream(imageUri);
-
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-            bitmap = BitmapFactory.decodeStream(iStream, null, options);
-            if (iStream != null) {
-                iStream.close();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bitmap;
-    }
 
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -448,57 +367,29 @@ public class roomActivity extends AppCompatActivity
         }
 
         n = Integer.parseInt(temp);
-        mf.moveCamera(mf.markers.get(n-1));
+        n--;
+        //mf.moveCamera(mf.markers.get(n-1));
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        ImageView picImgView = (ImageView)findViewById(R.id.picBodyImage);
+        TextView picNameTextView = (TextView) findViewById(R.id.pictureName);
+        TextView picTimeTextView = (TextView) findViewById(R.id.pictureTime);
+        TextView picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
+        TextView picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
+        TextView picCommentTextView = (TextView) findViewById(R.id.pictureComment);
+
+
+        picImgView.setImageBitmap(photoInfoList.get(n).getRotatedBitmap(this, dpToPx(this, 100), dpToPx(this, 80)));
+        picNameTextView.setText(photoInfoList.get(n).name);
+        picTimeTextView.setText("Time : "+String.valueOf(photoInfoList.get(n).time));
+        picLatitudeTextView.setText("Latitude : "+String.valueOf(photoInfoList.get(n).latitude));
+        picLongitudeTextView.setText("Longitude : "+String.valueOf(photoInfoList.get(n).longitude));
+        picCommentTextView.setText("Comment : "+photoInfoList.get(n).comment);
 
         return true;
     }
 
-    public static Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
 
-        Matrix matrix = new Matrix();
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_NORMAL:
-                return bitmap;
-            case ExifInterface.ORIENTATION_FLIP_HORIZONTAL:
-                matrix.setScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                matrix.setRotate(180);
-                break;
-            case ExifInterface.ORIENTATION_FLIP_VERTICAL:
-                matrix.setRotate(180);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_TRANSPOSE:
-                matrix.setRotate(90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                matrix.setRotate(90);
-                break;
-            case ExifInterface.ORIENTATION_TRANSVERSE:
-                matrix.setRotate(-90);
-                matrix.postScale(-1, 1);
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                matrix.setRotate(-90);
-                break;
-            default:
-                return bitmap;
-        }
-        try {
-            Bitmap bmRotated = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            bitmap.recycle();
-            return bmRotated;
-        }
-        catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     public void openTogetherPopup(String who){
         popuptogetherFragment dialog = popuptogetherFragment.newInstance(
@@ -757,5 +648,21 @@ public class roomActivity extends AppCompatActivity
     public void goHall(){
         Intent intent = new Intent(this, HallActivity.class);
         startActivity(intent);
+    }
+
+    public int dpToPx(Context context, float dp){
+        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+        return px;
+    }
+    public float pxToDp(Context context, float px) {
+        float density = context.getResources().getDisplayMetrics().density;
+        if(density == 1.0)
+            density *= 4.0;
+        else if(density == 1.5)
+            density *= (8/3);
+        else if(density == 2.0)
+            density *= 2.0;
+
+        return px/density;
     }
 }
