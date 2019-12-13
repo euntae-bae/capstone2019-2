@@ -84,6 +84,7 @@ public class roomActivity extends AppCompatActivity
     public Paper paper;
     String tempUid = null;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,6 +190,8 @@ public class roomActivity extends AppCompatActivity
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        photoInfoList.clear();
+        navigationView.getMenu().clear();
         if (requestCode == REQUEST_CODE) {
 
             List<MultipartBody.Part> parts = new ArrayList<>();
@@ -304,9 +307,6 @@ public class roomActivity extends AppCompatActivity
 
             //보낸 데이터 정리해보리기
             exifDataArrayList.clear();
-            photoInfoList.clear();
-
-
         }
     }
 
@@ -496,6 +496,22 @@ public class roomActivity extends AppCompatActivity
                 break;
         }
     }
+
+    public void mPicinfoOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.picinfoSaveBtn:
+                break;
+
+            case R.id.picinfoDeleteBtn:
+                int picId = Integer.parseInt(((TextView)findViewById(R.id.pictureName)).getText().toString().substring(7))-1;
+                photoInfoList.remove(picId);
+
+                exitFragment.dismissDialog();
+                break;
+        }
+    }
+
+
 
     public void mGroupMemberOnClick(View v) {
         switch (v.getId()) {

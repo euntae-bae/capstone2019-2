@@ -13,6 +13,7 @@ public class ScheduleResponse {
     private int count;
     @SerializedName("list")
     private ArrayList<Object> list = new ArrayList<>();
+    private ArrayList<String> imgList = new ArrayList<>();
 
     public int getCode() {
         return code;
@@ -42,6 +43,14 @@ public class ScheduleResponse {
     public long getListIndexTime(int i){
         String temp =  list.get(i).toString();
         int tStart = temp.indexOf("dateAndTime=") + 12;
+        int tEnd = temp.indexOf(", imageList=");
+        temp = temp.substring(tStart, tEnd).replaceAll("[- :TZ.]", "");
+        return Long.parseLong(temp);
+    }
+
+    public long getListIndexImgList(int i){
+        String temp =  list.get(i).toString();
+        int tStart = temp.indexOf("imageList=") + 10;
         int tEnd = temp.indexOf("}");
         temp = temp.substring(tStart, tEnd).replaceAll("[- :TZ.]", "");
         return Long.parseLong(temp);

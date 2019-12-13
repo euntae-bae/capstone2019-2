@@ -113,9 +113,35 @@
                     android:text="Comment"
                     android:textSize="15dp"/>
 
+                <Button
+                    android:layout_width="60dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/loginbtn"
+                    android:id="@+id/picinfoSaveBtn"
+                    android:text="저장"
+                    android:textColor="@color/colorBabyblue"
+                    android:layout_marginLeft="50dp"
+                    android:textSize="15dp"
+                    android:layout_above="@+id/picinfoTail"
+                    android:onClick="mPicinfoOnClick"/>
+
+                <Button
+                    android:layout_width="60dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/loginbtn"
+                    android:id="@+id/picinfoDeleteBtn"
+                    android:text="삭제"
+                    android:textColor="#FF0000"
+                    android:textSize="15dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_above="@+id/picinfoTail"
+                    android:layout_toEndOf="@+id/picinfoSaveBtn"
+                    android:onClick="mPicinfoOnClick"/>
+
                 <ImageView
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="20dp"
+                    android:layout_marginTop="20dp"
                     android:id="@+id/picinfoTail"
                     android:layout_alignParentBottom="true"
                     android:background="@drawable/tail_bar2"/>
