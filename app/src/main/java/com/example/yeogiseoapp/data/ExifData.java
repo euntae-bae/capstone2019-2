@@ -17,9 +17,6 @@ public class ExifData {
     @SerializedName("gid")
     private String gid;
 
-
-
-
     public ExifData(){}
 
     public ExifData(String name, Float longitude, Float latitude, long time, String id, String gid){

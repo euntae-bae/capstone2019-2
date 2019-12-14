@@ -19,7 +19,9 @@ import java.io.InputStream;
 public class PhotoInfo {
     Uri uri;
     int id;
+    String server_pathname = null;
     String name = "name";
+    int schedule_id;
     long time;
     float latitude;
     float longitude;

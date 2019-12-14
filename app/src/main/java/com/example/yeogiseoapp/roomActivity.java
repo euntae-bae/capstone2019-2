@@ -260,14 +260,14 @@ public class roomActivity extends AppCompatActivity
                         ExifUploadResponse result = response.body().get(0);
                         int code = result.getCode();
                         String message = result.getMessage();
-
+                        cf.sendStr(username, result.getImgIDList().toString());
                         if(code == 404){
                            // Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
                         }else{
                             //Toast.makeText(roomActivity.this,message,Toast.LENGTH_SHORT).show();
                             //업로드쪽 서비스 시작.
+                            //showToast(result.getimgID(0));
                         }
-
                     }
 
                     @Override
