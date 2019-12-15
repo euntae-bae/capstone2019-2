@@ -240,7 +240,6 @@ public class roomActivity extends AppCompatActivity
                     String filepath = checkedImgList.get(i).getRealPathFromURI(this);
                     String filename = filepath.substring(filepath.lastIndexOf("/")+1);
                     checkedImgList.get(i).time = temp.time;
-                    cf.sendStr(username, String.valueOf(temp.time));
                     checkedImgList.get(i).longitude = temp.longitude;
                     checkedImgList.get(i).latitude = temp.latitude;
                     checkedImgList.get(i).orientation = temp.orientation;
