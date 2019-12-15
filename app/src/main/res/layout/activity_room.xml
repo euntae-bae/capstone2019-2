@@ -59,19 +59,11 @@
                     android:layout_height="30dp"
                     android:id="@+id/picinfoHeader"
                     android:background="@drawable/header_bar2"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/picinfoHeader"
-                    android:id="@+id/pictureName"
-                    android:layout_margin="@dimen/picinfo_vertical_spacing"
-                    android:text="pictureName"
-                    android:textSize="20dp"/>
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/pictureName"
+                    android:layout_below="@+id/picinfoHeader"
                     android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/picinfo_vertical_spacing"
                     android:id="@+id/picBodyImage"
