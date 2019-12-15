@@ -66,7 +66,7 @@ public class GroupAdapter extends BaseAdapter {
     }
 
     // 아이템 데이터 추가를 위한 함수. 개발자가 원하는대로 작성 가능.
-    public void addItem(Drawable icon, String room, String info, String gid) {
+    public void addItem(Drawable icon, String room, String info, int gid) {
         GroupInfoItem item = new GroupInfoItem();
 
         item.setIcon(icon);

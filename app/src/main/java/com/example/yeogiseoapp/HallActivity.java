@@ -38,7 +38,8 @@ public class HallActivity extends AppCompatActivity {
 
     View layout;
     GroupAdapter adapter;
-    String email, username, uid;
+    String email, username;
+    int uid;
     private SharedPreferences sp;
     private ServiceApi service = null;
     EditText groupName;
@@ -57,7 +58,7 @@ public class HallActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         email = sp.getString("loggedinEmail", null);
         username = sp.getString("loggedinUsername", null);
-        uid = sp.getString("loggedinId", null);
+        uid = Integer.parseInt(sp.getString("loggedinId", null));
         ListView listview;
         inquiryGroup(new GroupInquiryData(uid));
 
@@ -78,7 +79,7 @@ public class HallActivity extends AppCompatActivity {
                 GroupInfoItem item = (GroupInfoItem)parent.getItemAtPosition(position);
                 String room = item.getRoom();
                 String info = item.getInfo();
-                String gid = item.getGroupID();
+                int gid = item.getGroupID();
 
                 Intent intent = new Intent(HallActivity.this, roomActivity.class);
                 intent.putExtra("email", email);
@@ -135,7 +136,7 @@ public class HallActivity extends AppCompatActivity {
                 GroupResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
                 int code = result.getCode();
                 String message = result.getMessage();
-                String groupID = result.getGroupID();
+                int groupID = result.getGroupID();
                 Toast.makeText(HallActivity.this, message, Toast.LENGTH_SHORT).show();
                 if (code == 201) {
                     // 그룹 생성 성공
@@ -155,7 +156,7 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
-    public void makeRoom(String title, String creator, String gid){
+    public void makeRoom(String title, String creator, int gid){
         adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator, gid);
         Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();

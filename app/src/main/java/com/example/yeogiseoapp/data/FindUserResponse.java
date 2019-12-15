@@ -10,7 +10,7 @@ public class FindUserResponse {
     @SerializedName("username")
     private String username;
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("email")
     private String email;
     @SerializedName("password")
@@ -25,7 +25,7 @@ public class FindUserResponse {
     public String getUsername() {
         return username;
     }
-    public String getId() {
+    public int getId() {
         return id;
     }
     public String getEmail() {

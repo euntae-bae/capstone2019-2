@@ -6,7 +6,7 @@ public class GroupInfoItem {
     private Drawable iconDrawble;
     private String roomStr ;
     private String infoStr ;
-    private String groupID;
+    private int groupID;
 
     public void setIcon(Drawable icon) {
         iconDrawble = icon;
@@ -18,7 +18,7 @@ public class GroupInfoItem {
     public void setInfo(String desc) {
         infoStr = desc ;
     }
-    public void setGroupID(String gid) {
+    public void setGroupID(int gid) {
         groupID = gid ;
     }
 
@@ -32,7 +32,7 @@ public class GroupInfoItem {
     public String getInfo() {
         return this.infoStr;
     }
-    public String getGroupID() {
+    public int getGroupID() {
         return this.groupID;
     }
 }

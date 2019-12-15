@@ -13,13 +13,13 @@ public class ExifData {
     @SerializedName("time")
     private long time;
     @SerializedName("id")
-    private String id;
+    private int id;
     @SerializedName("gid")
-    private String gid;
+    private int gid;
 
     public ExifData(){}
 
-    public ExifData(String name, Float longitude, Float latitude, long time, String id, String gid){
+    public ExifData(String name, Float longitude, Float latitude, long time, int id, int gid){
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
@@ -57,11 +57,11 @@ public class ExifData {
         return time;
     }
 
-    public String getGid() {
+    public int getGid() {
         return gid;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 }

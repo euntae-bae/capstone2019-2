@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName;
 
 public class RemoveGroupData {
     @SerializedName("groupID")
-    private String groupID;
+    private int groupID;
 
-    public RemoveGroupData(String gid) {
+    public RemoveGroupData(int gid) {
         groupID = gid;
     }
 
-    public String getGroupID() {
+    public int getGroupID() {
         return groupID;
     }
 }

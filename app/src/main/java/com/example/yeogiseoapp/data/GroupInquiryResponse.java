@@ -23,15 +23,15 @@ public class GroupInquiryResponse {
     private class GroupListData{
         private String groupName = null;
         private String creator = null;
-        private String groupID = null;
+        private int groupID = -1;
 
-        GroupListData(String n, String c, String i){
+        GroupListData(String n, String c, int i){
             groupName = n;
             creator = c;
             groupID = i;
         }
 
-        public void setData(String n, String c, String i){
+        public void setData(String n, String c, int i){
             groupName = n;
             creator = c;
             groupID = i;
@@ -39,7 +39,7 @@ public class GroupInquiryResponse {
 
         public String getGroupName() { return groupName; }
         public String getCreator() { return creator; }
-        public String getGroupID() { return groupID; }
+        public int getGroupID() { return groupID; }
     }
 
     public int getCode() {
@@ -63,7 +63,7 @@ public class GroupInquiryResponse {
             int delPt = (i != size-1) ? iEnd + 3 : iEnd;
             String n = strArr.substring(nStart, nEnd);
             String c = strArr.substring(cStart, cEnd);
-            String id = strArr.substring(iStart, iEnd);
+            int id = Math.round(Float.parseFloat(strArr.substring(iStart, iEnd)));
             groupArr.add(new GroupListData(n, c, id));
             strArr = strArr.substring(delPt);
         }
@@ -71,5 +71,5 @@ public class GroupInquiryResponse {
 
     public String getIndexGroupName(int i){ return groupArr.get(i).getGroupName(); }
     public String getIndexCreator(int i){ return groupArr.get(i).getCreator(); }
-    public String getIndexGroupID(int i){ return groupArr.get(i).getGroupID(); }
+    public int getIndexGroupID(int i){ return groupArr.get(i).getGroupID(); }
 }
