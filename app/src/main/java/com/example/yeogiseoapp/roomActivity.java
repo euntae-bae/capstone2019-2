@@ -85,6 +85,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/*
+    그룹에 입장한 뒤 보여지는 화면이다.
+    채팅, 업로드, 경로 생성, 같이보기, 실시간 그리기, 그룹 멤버 초대, 그룹 멤버 조회, 그룹 나가기 등의 기능이 있다.
+
+ */
 public class roomActivity extends AppCompatActivity
     implements NavigationView.OnNavigationItemSelectedListener{
     private AppBarConfiguration mAppBarConfiguration;
@@ -179,6 +184,7 @@ public class roomActivity extends AppCompatActivity
         return true;
     }
 
+    // 화면 우측 상단의 메뉴를 누를 때 실행되는 함수이다. 해당 버튼의 id에 따라 각각 초대, 업로드, 멤버 리스트, 나가기 등의 기능을 수행한다.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
@@ -234,6 +240,11 @@ public class roomActivity extends AppCompatActivity
     }
     public String getRoom() { return room; }
 
+    /*
+
+     upload 버튼을 통해 갤러리의 이미지를 서버에 올릴 때 실행되는 함수이다.
+     갤러리로부터 사진들을 가져온 뒤 EXIF 업로드, 사진 데이터 업로드, 스케쥴 초기화 등의 순서로 구성된다.
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         ArrayList<PhotoInfo> checkedImgList = new ArrayList<>();
@@ -355,25 +366,7 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
-    public void makeMarkerByPhotoList(boolean isUri){
-        Drawable drawable;
-        Bitmap pic;
-        for(int i=0; i<photoInfoList.size(); i++){
-            photoInfoList.get(i).id = i;
-
-            drawable = getDrawable(R.drawable.ic_menu_camera);
-            navigationView.getMenu().add(Menu.NONE, Menu.FIRST, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
-
-            if(isUri)
-                pic = photoInfoList.get(i).getRotatedBitmap(this, 130, 87);
-            else
-                pic = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_camera);
-            if(photoInfoList.get(i).longitude != -1 && photoInfoList.get(i).latitude != -1)
-                mf.makeMarker(photoInfoList.get(i).latitude, photoInfoList.get(i).longitude, pic);
-        }
-        mf.drawPath();
-    }
-
+    // 네비게이션 드로어 메뉴에 사진들의 목록을 띄워주고 이를 메뉴 아이템으로 만드는 함수이다.
     public void makeNavigationMenuUsingPhotos(){
         for(int i=0; i<photoInfoList.size(); i++){
             Drawable drawable = getDrawable(R.drawable.ic_menu_camera);
@@ -381,6 +374,8 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+
+    // 서버에서 받아온 일정 정보로 구글맵 위에 해당 경로를 띄워주는 함수이다.
     public void makeMarkerByScheduleList(boolean isUri){
         Bitmap pic;
         for(int i=0; i<scheduleInfoArrayList.size(); i++){
@@ -410,27 +405,12 @@ public class roomActivity extends AppCompatActivity
         mf.drawPath();
     }
 
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = 1280;
-        int height = 720;
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
-    }
 
     private RequestBody createPart(int descString){
         return RequestBody.create(MultipartBody.FORM, String.valueOf(descString));
     }
 
+    // 이미지를 리사이즈 하여 업로드 하는 함수이다.
     private MultipartBody.Part prepareFilePart(String partName, String filepath){
 
         //resize the file down to around 720p
@@ -482,6 +462,7 @@ public class roomActivity extends AppCompatActivity
 
     }
 
+    // 갤러리로부터 가져온 사진에서 EXIF 데이터를 추출하는 함수이다.
     public PhotoInfo getExifInfo(InputStream filepath)
     {
         ExifInterface exif = null;
@@ -509,7 +490,7 @@ public class roomActivity extends AppCompatActivity
 
 
 
-
+    // 네비게이션 드로어 메뉴에서 사진을 클릭 시 해당 사진에 대응되는 데이터들을 출력하는 함수이다.
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
@@ -534,7 +515,7 @@ public class roomActivity extends AppCompatActivity
     }
 
 
-
+    // 같이보기 요청 수락 여부 창을 띄우는 함수이다.
     public void openTogetherPopup(String who, float lati, float longi, float zoom){
         mf.moveCamera(new LatLng(lati, longi), zoom);
 
@@ -545,18 +526,21 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    // 그룹 초대 창을 띄우는 함수이다.
     public void openInvitePopup(){
         popupinviteFragment dialog = popupinviteFragment.newInstance();
         inviteFragment = dialog;
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    // 그룹 나가기 창을 띄우는 함수이다.
     public void openExitPopup(){
         popupExitFragment dialog = popupExitFragment.newInstance();
         exitFragment = dialog;
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    // 그룹 멤버 리스트를 띄우는 함수이다.
     public void openGroupMemberPopup(ArrayList<String> ns, ArrayList<String> es){
         popupGroupMemberFragment dialog = popupGroupMemberFragment.newInstance();
         groupMemberFragment = dialog;
@@ -564,8 +548,13 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    // 소켓을 통해 같이보기 요청을 하는 함수이다.
     public void sendAllow(LatLng latLng, float zoom){ cf.emitTogether(latLng, zoom); }
+
+    // 소켓을 통해 그리기 정보를 전송하는 함수이다.
     public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
+
+    // 같이보기 그리기 기능을 위해 해당 프래그먼트를 실행하는 함수이다.
     public void openOverlay(int i){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();
@@ -576,6 +565,7 @@ public class roomActivity extends AppCompatActivity
         ft.commit();
     }
 
+    // 같이보기 기능을 종료하는 함수이다.
     public void deleteFrag(View v){
         FragmentManager fm=getSupportFragmentManager();
         FragmentTransaction ft=fm.beginTransaction();
@@ -586,6 +576,7 @@ public class roomActivity extends AppCompatActivity
         ft.commit();
     }
 
+    // 같이보기 수락 여부를 담당하는 함수이다.
     public void mAllowOnClick(View v) {
         switch (v.getId()) {
             case R.id.popAllowBtn:
@@ -601,6 +592,7 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    // 초대 확인&취소 여부를 담당하는 함수이다.
     public void mInviteOnClick(View v) {
         switch (v.getId()) {
             case R.id.popInviteOkBtn:
@@ -614,6 +606,7 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    // 나가기 확인&취소 여부를 담당하는 함수이다.
     public void mExitOnClick(View v) {
         switch (v.getId()) {
             case R.id.popExitOkBtn:
@@ -629,6 +622,7 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    // 네비게이션 드로어 메뉴에서 검색, 저장, 삭제를 담당하는 함수이다.
     public void mPicinfoOnClick(View v) {
         switch (v.getId()) {
             case R.id.picinfoSaveBtn:
@@ -649,7 +643,7 @@ public class roomActivity extends AppCompatActivity
     }
 
 
-
+    // 그룹 멤버 리스트 닫기 함수이다.
     public void mGroupMemberOnClick(View v) {
         switch (v.getId()) {
             case R.id.popGroupMemberOkBtn:
@@ -658,6 +652,7 @@ public class roomActivity extends AppCompatActivity
         }
     }
 
+    // 전송받은 그리기 정보를 통해 그리는 함수이다.
     public void drawByReceivedData(float x, float y){
             paper.receivePath(x, y);
     }
@@ -671,6 +666,7 @@ public class roomActivity extends AppCompatActivity
     public void stopDrawing(){ paper.chkDrawing = false; }
     public int getGid() { return gid; }
 
+    // 그룹 초대를 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void inviteUser(final InviteData data) {
         service.invite(data).enqueue(new Callback<InviteResponse>() {
             @Override
@@ -697,6 +693,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 유저 조회를 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void findUserid(final FindUserData data) {
         service.findUser(data).enqueue(new Callback<FindUserResponse>() {
             @Override
@@ -726,6 +723,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 그룹 나가기를 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void exitGroup(final ExitGroupData data) {
         service.exitGroup(data).enqueue(new Callback<ExitGroupResponse>() {
             @Override
@@ -752,6 +750,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 그룹 삭제를 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void removeGroup(final RemoveGroupData data) {
         service.removeGroup(data).enqueue(new Callback<RemoveGroupResponse>() {
             @Override
@@ -778,6 +777,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 그룹 멤버 리스트 조회를 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void groupMemberList(final GroupMemberListData data, final boolean isOpenPopup) {
         service.groupMemberList(data).enqueue(new Callback<GroupMemberListResponse>() {
             @Override
@@ -807,6 +807,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 일정 초기화를 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void initSchedule(final ScheduleData data) {
         service.getSchedule(data).enqueue(new Callback<ScheduleResponse>() {
             @Override
@@ -839,6 +840,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 사진 데이터 초기화를 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void getPhotoInfoList(final GetPhotoInfoData data) {
         service.getPhotoInfo(data).enqueue(new Callback<GetPhotoInfoResponse>() {
             @Override
@@ -875,6 +877,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 사진 삭제를 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void removeImage(final RemoveImageData data) {
         service.removeImage(data).enqueue(new Callback<RemoveImageResponse>() {
             @Override
@@ -897,6 +900,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 코멘트 작성을 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void setComment(final CommentData data) {
         service.comment(data).enqueue(new Callback<CommentResponse>() {
             @Override
@@ -916,6 +920,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    // 이미지 대상 정보 검색을 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void getLandMark(final LandMarkData pathname) {
         service.getLandMark(pathname).enqueue(new Callback<LandMarkResponse>() {
             @Override
@@ -955,10 +960,13 @@ public class roomActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    //DP 단위를 PX단위로 바꿔주는 함수
     public int dpToPx(Context context, float dp){
         int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
         return px;
     }
+
+    //PX 단위를 DP단위로 바꿔주는 함수
     public float pxToDp(Context context, float px) {
         float density = context.getResources().getDisplayMetrics().density;
         if(density == 1.0)
@@ -972,7 +980,7 @@ public class roomActivity extends AppCompatActivity
     }
 
 
-
+    //이미지를 웹으로부터 받아 출력해주는 클래스
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         ImageView bmImage;
         Bitmap b;

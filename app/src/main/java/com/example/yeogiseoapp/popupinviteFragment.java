@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
 
+// 그룹에 유저 초대 창을 띄워주는 Fragment이다.
 public class popupinviteFragment extends DialogFragment {
     EditText inviteEdtText;
     public static popupinviteFragment newInstance() {

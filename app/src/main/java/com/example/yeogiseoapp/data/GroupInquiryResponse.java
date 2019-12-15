@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
+// 해당 유저가 속한 그룹의 정보를 서버로부터 반환받은 데이터
 public class GroupInquiryResponse {
     @SerializedName("code")
     private int code;

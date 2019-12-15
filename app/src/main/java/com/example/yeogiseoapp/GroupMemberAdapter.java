@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+/*
+해당 그룹에 속한 멤버들의 정보를 받아온 뒤
+이를 화면에 나타내기 위한 GroupMember Adapter클래스이다.
+ */
 public class GroupMemberAdapter extends BaseAdapter {
     // Adapter에 추가된 데이터를 저장하기 위한 ArrayList
     private ArrayList<GroupMemberItem> groupMemberList = new ArrayList<GroupMemberItem>() ;

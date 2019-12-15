@@ -34,6 +34,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/*
+로그인 과정 이후 그룹을 조회하여 목록을 띄워주고 그룹을 생성할 수 있는 화면이다.
+그룹 생성, 그룹 조회, 그룹 입장, 로그아웃 등의 기능이 있다.
+ */
 public class HallActivity extends AppCompatActivity {
 
     View layout;
@@ -68,6 +72,7 @@ public class HallActivity extends AppCompatActivity {
         listview = (ListView)findViewById(R.id.listview);
         listview.setAdapter(adapter);
 
+        // 그룹에 입장하기 위해 로그인 정보 및 해당 그룹 정보를 다음 액티비티에 전송한다.
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -94,6 +99,7 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
+    // 그룹 조회를 위한 서버와의 인터페이스를 실행하는 함수이다.
     public void inquiryGroup(final GroupInquiryData data) {
         service.groupInquiry(data).enqueue(new Callback<GroupInquiryResponse>() {
             @Override
@@ -123,12 +129,14 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
+    // 그룹 생성 창을 띄우는 함수이다.
     public void openMakeGroupPopup(){
         makegroupPopupFragment dialog = makegroupPopupFragment.newInstance();
         mf = dialog;
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
+    // 그룹 생성을 위한 서버와의 인터페이스를 실행하는 함수이다.
     private void makeGroup(final GroupData data) {
         service.groupMake(data).enqueue(new Callback<GroupResponse>() {
             @Override
@@ -156,6 +164,7 @@ public class HallActivity extends AppCompatActivity {
         });
     }
 
+    // 화면에 그룹을 출력하는 함수이다.
     public void makeRoom(String title, String creator, int gid){
         adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator, gid);
         Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
@@ -163,6 +172,7 @@ public class HallActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    //로그아웃 버튼을 생성하는 함수이다.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -170,6 +180,7 @@ public class HallActivity extends AppCompatActivity {
         return true;
     }
 
+    // sharedrefference 데이터를 삭제하여 로그아웃 기능을 수행하는 함수이다.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
@@ -186,12 +197,14 @@ public class HallActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // 이미지를 업&다운로드 받기위해 권한을 설정하는 과정이다.
     public void checkPermission(){
         if(checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
     }
 
+    // 그룹 생성 화면에서 확인 & 취소를 담당하는 함수이다.
     public void mGroupOnClick(View v) {
         switch (v.getId()) {
             case R.id.popMakeGroupOkBtn:
@@ -206,7 +219,4 @@ public class HallActivity extends AppCompatActivity {
         }
     }
 
-    public void showToast(String s){
-        Toast.makeText(HallActivity.this, s, Toast.LENGTH_SHORT).show();
-    }
 }

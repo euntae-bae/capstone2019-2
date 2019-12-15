@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
 
+// 그룹 나가기 창을 띄워주는 Fragment이다.
 public class popupExitFragment extends DialogFragment {
     public static popupExitFragment newInstance() {
         Bundle bundle = new Bundle();

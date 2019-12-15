@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+// 일정 정보를 받은 이후 서버로부터 반환된 데이터
 public class ScheduleResponse {
     @SerializedName("code")
     private int code;

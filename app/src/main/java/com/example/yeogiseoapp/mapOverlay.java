@@ -20,6 +20,7 @@ import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
 
+// 구글맵 위에 그려지게 하는 Fragment이다.
 public class mapOverlay extends Fragment {
     Button back_btn;
 

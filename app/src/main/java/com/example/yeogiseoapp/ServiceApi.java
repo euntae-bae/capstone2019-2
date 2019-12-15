@@ -45,6 +45,7 @@ import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
 
+// aws 서버와 통신하기 위한 인터페이스를 정의해놓은 파일이다.
 public interface ServiceApi {
 
     String URL = "ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com";

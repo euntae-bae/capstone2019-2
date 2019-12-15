@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
 
+// 같이보기 요청을 띄워주는 Fragment이다.
 public class popuptogetherFragment extends DialogFragment {
 
     private static final String ARG_DIALOG_MAIN_MSG = "dialog_main_msg";

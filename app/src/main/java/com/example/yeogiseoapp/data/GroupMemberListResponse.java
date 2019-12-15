@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+// 해당 그룹에 속한 멤버들의 정보를 서버로부터 반환받은 데이터
 public class GroupMemberListResponse {
     @SerializedName("code")
     private int code;

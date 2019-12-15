@@ -2,6 +2,7 @@ package com.example.yeogiseoapp;
 
 import android.graphics.drawable.Drawable;
 
+// 그룹이 가지는 데이터들을 정의해놓은 클래스이다.
 public class GroupInfoItem {
     private Drawable iconDrawble;
     private String roomStr ;

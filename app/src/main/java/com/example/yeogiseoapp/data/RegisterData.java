@@ -2,6 +2,7 @@ package com.example.yeogiseoapp.data;
 
 import com.google.gson.annotations.SerializedName;
 
+// 회원가입 과정을 위해 서버로 보내는 데이터
 public class RegisterData {
     @SerializedName("email")
     private String email;

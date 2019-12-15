@@ -2,6 +2,7 @@ package com.example.yeogiseoapp.data;
 
 import com.google.gson.annotations.SerializedName;
 
+// 로그인 과정 이후 서버로부터 반환받은 데이터
 public class LoginResponse {
     @SerializedName("code")
     private int code;

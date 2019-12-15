@@ -2,6 +2,7 @@ package com.example.yeogiseoapp.data;
 
 import com.google.gson.annotations.SerializedName;
 
+// EXIF 설정을 위해 서버측에 보내는 데이터
 public class ExifData {
 
     @SerializedName("name")

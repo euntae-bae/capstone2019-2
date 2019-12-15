@@ -22,7 +22,7 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-
+// 채팅 화면이 속한 프래그먼트를 선언하는 부분이다.
 public class chatFragment extends Fragment {
     RecyclerView recyclerView;
     LinearLayoutManager layoutManager;
@@ -35,6 +35,13 @@ public class chatFragment extends Fragment {
     private String TAG = "ChatFragment";
     private Socket mSocket;
 
+
+    /*
+
+    뷰가 생성될 때 socket을 초기화 하고 해당 socket의 함수들을 정의해준다.
+    채팅 메시지를 주고 받을 때, 같이 보기 요청을 주고 받을 때, 그리기 정보를 주고 받을 때, 그리기 멈춤 신호를 주고 받을 때 등에 쓰인다.
+
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -121,7 +128,15 @@ public class chatFragment extends Fragment {
         return v;
     }
 
+    /*
+
+    채팅 프래그먼트를 초기화 해주는 코드이다.
+    해당 파일에서 본 함수가 실행이 되는 위치에 따라 비동기 처리에 의한 오류가 생길 수 있어
+    roomActivity에서 필요한 리소스들이 할당된 이후에 실행되도록 하였다.
+
+     */
     public void initChat() {
+
         recyclerView = (RecyclerView)getView().findViewById(R.id.my_recycler_view);
 
         // use this setting to improve performance if you know that changes
@@ -143,6 +158,7 @@ public class chatFragment extends Fragment {
         mAdapter.notifyItemInserted(l.size() -1);
     }
 
+    // 채팅창에 내용을 추가하는 함수이다.
     public void sendStr(String name, String txt)
     {
         chat c = new chat(name, txt);
@@ -152,12 +168,16 @@ public class chatFragment extends Fragment {
         editText.setText("");
     }
 
+    // 같이 보기 요청을 보내는 함수이다.
     public void emitTogether(LatLng latLng, float zoom){
         mSocket.emit("ask_from_client", room, name, latLng.latitude, latLng.longitude, zoom);
     }
 
+    // 그리기 정보를 전송하는 함수이다.
     public void emitPath(float x, float y) { mSocket.emit("path_from_client", room, x, y); }
 
+
+    // 그리기 멈춤 신호를 보내는 함수이다.
     public void emitStop(){
         mSocket.emit("stop_drawing_from_client", room);
     }

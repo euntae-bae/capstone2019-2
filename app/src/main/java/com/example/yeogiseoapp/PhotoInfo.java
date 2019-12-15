@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+// 서버로부터 받아온 사진의 정보를 담는 클래스이다.
 public class PhotoInfo {
     Uri uri;
     int id;

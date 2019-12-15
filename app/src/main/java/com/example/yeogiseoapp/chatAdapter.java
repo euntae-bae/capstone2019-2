@@ -16,6 +16,7 @@ import org.w3c.dom.Text;
 
 import java.util.List;
 
+// 채팅 메시지들을 담고있는 일종의 Handler 클래스이다.
 public class chatAdapter extends RecyclerView.Adapter<chatAdapter.MyViewHolder> {
     private List<chat> mChat;
     private String email;

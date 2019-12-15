@@ -29,7 +29,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-
+// 구글 맵을 띄우는 Fragment이다.
 public class mapFragment extends Fragment
         implements OnMapReadyCallback {
     private MapView mapView = null;

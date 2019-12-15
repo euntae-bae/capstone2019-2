@@ -2,6 +2,7 @@ package com.example.yeogiseoapp.data;
 
 import com.google.gson.annotations.SerializedName;
 
+// 그룹에 유저를 초대하기 위해 서버로 보내는 데이터
 public class InviteData {
     @SerializedName("groupID")
     private int groupID;

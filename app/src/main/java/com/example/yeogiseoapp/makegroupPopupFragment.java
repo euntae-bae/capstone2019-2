@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.fragment.app.DialogFragment;
 
+// 그룹 생성 창을 띄우는 Fragment이다.
 public class makegroupPopupFragment extends DialogFragment {
     EditText groupEdtText;
     public static makegroupPopupFragment newInstance() {

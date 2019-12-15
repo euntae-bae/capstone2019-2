@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+// 그룹에 속한 사진들의 정보를 서버로부터 반환받은 데이터
 public class GetPhotoInfoResponse {
 
     @SerializedName("code")

@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
+// 그룹 멤버 리스트 창을 띄워주는 Fragment이다.
 public class popupGroupMemberFragment extends DialogFragment {
     ListView groupMemberListview;
     GroupMemberAdapter adapter;

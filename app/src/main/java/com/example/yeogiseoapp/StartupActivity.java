@@ -13,6 +13,8 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.yeogiseoapp.ui.login.LoginActivity;
 
+
+// 로그인 정보가 있다면 자동 로그인을 하고 없다면 로그인 화면으로 넘어가는 자동 로그인 액티비티이다.
 public class StartupActivity extends Activity {
     private SharedPreferences sp;
     //private SharedPreferences.Editor editor;

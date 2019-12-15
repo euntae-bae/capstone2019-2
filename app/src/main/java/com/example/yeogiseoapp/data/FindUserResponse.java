@@ -2,6 +2,7 @@ package com.example.yeogiseoapp.data;
 
 import com.google.gson.annotations.SerializedName;
 
+// 찾은 유저의 정보를 서버로부터 반환받은 데이터
 public class FindUserResponse {
     @SerializedName("code")
     private int code;
