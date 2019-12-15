@@ -46,6 +46,7 @@ import com.example.yeogiseoapp.data.RemoveImageResponse;
 import com.example.yeogiseoapp.data.ScheduleData;
 import com.example.yeogiseoapp.data.ScheduleResponse;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
@@ -532,7 +533,9 @@ public class roomActivity extends AppCompatActivity
 
 
 
-    public void openTogetherPopup(String who){
+    public void openTogetherPopup(String who, float lati, float longi, float zoom){
+        mf.moveCamera(new LatLng(lati, longi), zoom);
+
         popuptogetherFragment dialog = popuptogetherFragment.newInstance(
                 getString(R.string.allow_popup_dialog_msg, who)
         );
@@ -559,7 +562,7 @@ public class roomActivity extends AppCompatActivity
         dialog.show(getSupportFragmentManager(), "dialog");
     }
 
-    public void sendAllow(){ cf.emitTogether(); }
+    public void sendAllow(LatLng latLng, float zoom){ cf.emitTogether(latLng, zoom); }
     public void cfPathEmit(float x, float y) { cf.emitPath(x, y); }
     public void openOverlay(int i){
         FragmentManager fm=getSupportFragmentManager();

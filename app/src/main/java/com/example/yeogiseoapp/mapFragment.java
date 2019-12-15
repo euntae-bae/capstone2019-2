@@ -19,6 +19,7 @@ import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -58,7 +59,7 @@ public class mapFragment extends Fragment
         allowBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((roomActivity)getActivity()).sendAllow();
+                ((roomActivity)getActivity()).sendAllow(getCenterPos(), getZoom());
                 ((roomActivity)getActivity()).openOverlay(2);
             }
         });
@@ -176,9 +177,17 @@ public class mapFragment extends Fragment
         polylines.clear();
     }
 
-    public void moveCamera(LatLng dest){
+    public void moveCamera(LatLng dest, float zoom){
         mMap.moveCamera(CameraUpdateFactory.newLatLng(dest));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(zoom));
+    }
+
+    public LatLng getCenterPos(){
+        return mMap.getCameraPosition().target;
+    }
+
+    public float getZoom() {
+        return mMap.getCameraPosition().zoom;
     }
 
 }

@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +74,7 @@ public class chatFragment extends Fragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            ((roomActivity) getActivity()).openTogetherPopup(args[0].toString());
+                            ((roomActivity) getActivity()).openTogetherPopup(args[0].toString(), Float.parseFloat(args[1].toString()), Float.parseFloat(args[2].toString()), Float.parseFloat(args[3].toString()));
                         }
                     });
             }
@@ -150,8 +152,8 @@ public class chatFragment extends Fragment {
         editText.setText("");
     }
 
-    public void emitTogether(){
-        mSocket.emit("ask_from_client", room, name);
+    public void emitTogether(LatLng latLng, float zoom){
+        mSocket.emit("ask_from_client", room, name, latLng.latitude, latLng.longitude, zoom);
     }
 
     public void emitPath(float x, float y) { mSocket.emit("path_from_client", room, x, y); }
