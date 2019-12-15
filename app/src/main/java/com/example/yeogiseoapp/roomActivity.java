@@ -39,6 +39,8 @@ import com.example.yeogiseoapp.data.GroupMemberListResponse;
 import com.example.yeogiseoapp.data.ImageUploadResponse;
 import com.example.yeogiseoapp.data.InviteData;
 import com.example.yeogiseoapp.data.InviteResponse;
+import com.example.yeogiseoapp.data.LandMarkData;
+import com.example.yeogiseoapp.data.LandMarkResponse;
 import com.example.yeogiseoapp.data.RemoveGroupData;
 import com.example.yeogiseoapp.data.RemoveGroupResponse;
 import com.example.yeogiseoapp.data.RemoveImageData;
@@ -637,6 +639,12 @@ public class roomActivity extends AppCompatActivity
                 int picId = Integer.parseInt(((TextView)findViewById(R.id.pictureId)).getText().toString());
                 removeImage(new RemoveImageData(picId));
                 break;
+
+
+            case R.id.picinfoSearchBtn:
+                String picNewName = picPathTextView.getText().toString().substring(7);
+                getLandMark(new LandMarkData(picNewName));
+                break;
         }
     }
 
@@ -907,6 +915,33 @@ public class roomActivity extends AppCompatActivity
             }
         });
     }
+
+    private void getLandMark(final LandMarkData pathname) {
+        service.getLandMark(pathname).enqueue(new Callback<LandMarkResponse>() {
+            @Override
+            public void onResponse(Call<LandMarkResponse> call, Response<LandMarkResponse> response) {
+
+                String landmark = response.body().getLandmarkName();
+                float score = response.body().getScore();
+
+                if(landmark.contains("not found")){
+                    Toast.makeText(roomActivity.this,"랜드마크 검색 결과 없음",Toast.LENGTH_SHORT).show();
+                }else{
+                    Uri link = Uri.parse("https://www.google.com/search?q="+landmark);
+                    Intent it = new Intent(Intent.ACTION_VIEW, link);
+                    startActivity(it);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<LandMarkResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this,"랜드마크 검색 실패",Toast.LENGTH_SHORT).show();
+                Log.e("전송 오류 발생", t.getMessage());
+            }
+        });
+    }
+
 
 
     public void setTempUid(int uid){ tempUid = uid; }

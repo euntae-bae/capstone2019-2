@@ -123,19 +123,32 @@
                     android:textSize="15dp"/>
 
                 <Button
-                    android:layout_width="60dp"
+                    android:layout_width="50dp"
                     android:layout_height="45dp"
                     android:background="@drawable/loginbtn"
-                    android:id="@+id/picinfoSaveBtn"
-                    android:text="저장"
+                    android:id="@+id/picinfoSearchBtn"
+                    android:text="검색"
                     android:textColor="@color/colorBabyblue"
-                    android:layout_marginLeft="50dp"
+                    android:layout_marginLeft="10dp"
                     android:textSize="15dp"
                     android:layout_above="@+id/picinfoTail"
                     android:onClick="mPicinfoOnClick"/>
 
                 <Button
-                    android:layout_width="60dp"
+                    android:layout_width="50dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/loginbtn"
+                    android:id="@+id/picinfoSaveBtn"
+                    android:text="저장"
+                    android:textColor="@color/colorBabyblue"
+                    android:layout_marginLeft="5dp"
+                    android:textSize="15dp"
+                    android:layout_above="@+id/picinfoTail"
+                    android:layout_toEndOf="@+id/picinfoSearchBtn"
+                    android:onClick="mPicinfoOnClick"/>
+
+                <Button
+                    android:layout_width="50dp"
                     android:layout_height="45dp"
                     android:background="@drawable/loginbtn"
                     android:id="@+id/picinfoDeleteBtn"

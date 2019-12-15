@@ -17,6 +17,7 @@ import com.example.yeogiseoapp.data.InviteResponse;
 import com.example.yeogiseoapp.data.ExifData;
 import com.example.yeogiseoapp.data.ExifUploadResponse;
 import com.example.yeogiseoapp.data.ImageUploadResponse;
+import com.example.yeogiseoapp.data.LandMarkData;
 import com.example.yeogiseoapp.data.LandMarkResponse;
 import com.example.yeogiseoapp.data.LoginData;
 import com.example.yeogiseoapp.data.LoginResponse;
@@ -77,7 +78,7 @@ public interface ServiceApi {
             @Part List<MultipartBody.Part> files
             );
     @GET("/api")
-    Call<LandMarkResponse> getLandMark(@Body String path);
+    Call<LandMarkResponse> getLandMark(@Body LandMarkData path);
 
     @POST("/schedule")
     Call<ScheduleResponse> getSchedule(@Body ScheduleData data);
