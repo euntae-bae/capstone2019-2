@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.TypedValue;
@@ -39,8 +40,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -125,6 +128,11 @@ public class roomActivity extends AppCompatActivity
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/tempImage");
+        File dir = new File("/storage/emulated/0/Yeogiseo//tempImage");
+        if(!dir.exists()) dir.mkdirs();
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -165,9 +173,12 @@ public class roomActivity extends AppCompatActivity
                 || super.onSupportNavigateUp();
     }
 
+
+    //안쓰는 함수
     private MultipartBody.Part prepareFilePart(String partName, Uri fileUri) {
         // use the FileUtils to get the actual file by uri
         File file = new File(fileUri.getPath());
+
 
         // create RequestBody instance from file
         RequestBody requestFile =
@@ -218,7 +229,7 @@ public class roomActivity extends AppCompatActivity
                     temp = getExifInfo(in);
 
                     String filepath = photoInfoList.get(i).getRealPathFromURI(this);
-                    String filename = filepath.substring(filepath.lastIndexOf("/")+1);
+                    //String filename = filepath.substring(filepath.lastIndexOf("/")+1);
                     photoInfoList.get(i).time = temp.time;
                     photoInfoList.get(i).longitude = temp.longitude;
                     photoInfoList.get(i).latitude = temp.latitude;
@@ -243,10 +254,7 @@ public class roomActivity extends AppCompatActivity
                     String filename = filepath.substring(filepath.lastIndexOf("/")+1);
 
                     //데이터 서버측으로 전송할 준비
-                    // 데이터를 모아서 하나의 JSON으로 보내야 함.
-                    //filename 읽어서 바꿔줘야 함
-
-                    //TODO  보내는 정보에 내 클라이언트 정보(그룹ID, 유저ID 추가해서 보내야 함. 라우터측 작업도 필요)
+                    //파일추가 하는 부분, 이미지 리사이징 필요.
                     exifDataArrayList.add(new ExifData(filename,photoInfoList.get(i).longitude,photoInfoList.get(i).latitude,photoInfoList.get(i).time,id,gid));
                     parts.add(prepareFilePart("photo",filepath));
                 }
@@ -260,7 +268,7 @@ public class roomActivity extends AppCompatActivity
                         ExifUploadResponse result = response.body().get(0);
                         int code = result.getCode();
                         String message = result.getMessage();
-                        cf.sendStr(username, result.getImgIDList().toString());
+                        //cf.sendStr(username, result.getImgIDList().toString());
                         if(code == 404){
                            // Toast.makeText(roomActivity.this,"Error",Toast.LENGTH_SHORT).show();
                         }else{
@@ -335,11 +343,52 @@ public class roomActivity extends AppCompatActivity
 
     private MultipartBody.Part prepareFilePart(String partName, String filepath){
 
+        //resize the file down to around 720p
+        //TODO 이미지 크기 읽어들여서 720p 근처가 될 떄까지 디코드해서 읽어들임
+        int wantedSize;
+
+        //입력된 이미지의 크기만 받아옴
+        BitmapFactory.Options sizeOption = new BitmapFactory.Options();
+        sizeOption.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filepath,sizeOption);
+        int imgWidth = sizeOption.outWidth;
+        int imgHeight = sizeOption.outHeight;
+        int shortSize = Math.min(imgHeight,imgWidth);
+
+        //크기에 따른 비율 설정
+        if(shortSize>2880){
+            wantedSize = 4;
+        }else if(shortSize>1440){
+            wantedSize = 2;
+        }else {
+            wantedSize = 1;
+        }
+
+        //보낼 리사이즈 파일 생성.
+        BitmapFactory.Options option = new BitmapFactory.Options();
+        option.inSampleSize = wantedSize;
+        //inSampleSize옵션을 활용하는게 특정 크기로 줄이는 것보다 빠름.
+        Bitmap source = BitmapFactory.decodeFile(filepath,option);
         File imgFile = new File(filepath);
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"),imgFile);
 
-        return MultipartBody.Part.createFormData(partName,imgFile.getName(),requestFile);
+        //파일을 임시로 저장, 특정 주기로 삭제함.
+        File modedFile = new File("/storage/emulated/0/Yeogiseo/tempImage","md"+imgFile.getName());
+        try {
+            Log.e("just in try","1");
+            OutputStream os = new FileOutputStream(modedFile);
+            source.compress(Bitmap.CompressFormat.JPEG,100,os);
+            Log.d("before create","yes");
+            requestFile = RequestBody.create(MediaType.parse("image/*"),modedFile);
+            os.flush();
+            os.close();
+            return MultipartBody.Part.createFormData(partName,imgFile.getName(),requestFile);
 
+        }catch (Exception e){
+            Log.e("filestream",e.getLocalizedMessage());
+        }
+
+        return MultipartBody.Part.createFormData(partName,imgFile.getName(),requestFile);
     }
 
     public PhotoInfo getExifInfo(InputStream filepath)
