@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName;
 
 public class GroupInquiryData {
     @SerializedName("id")
-    private String id;
+    private int id;
 
-    public GroupInquiryData(String uid) {
+    public GroupInquiryData(int uid) {
         id = uid;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 }

@@ -8,13 +8,13 @@ public class GroupResponse {
     @SerializedName("message")
     private String message;
     @SerializedName("groupID")
-    private String groupID;
+    private int groupID;
 
     public int getCode() {
         return code;
     }
     public String getMessage() { return message; }
-    public String getGroupID() {
+    public int getGroupID() {
         return groupID;
     }
 }

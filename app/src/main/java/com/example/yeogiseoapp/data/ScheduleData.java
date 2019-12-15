@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName;
 
 public class ScheduleData {
     @SerializedName("groupID")
-    private String groupID;
+    private int groupID;
 
-    public ScheduleData(String gid) {
+    public ScheduleData(int gid) {
         groupID = gid;
     }
 
-    public String getGroupID() {
+    public int getGroupID() {
         return groupID;
     }
 }

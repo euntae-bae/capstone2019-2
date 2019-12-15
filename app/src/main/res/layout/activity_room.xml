@@ -81,6 +81,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/picBodyImage"
+                    android:id="@+id/pictureId"
+                    android:layout_margin="@dimen/picinfo_vertical_spacing"
+                    android:text="pictureId"
+                    android:textSize="15dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/pictureId"
                     android:id="@+id/pictureTime"
                     android:layout_margin="@dimen/picinfo_vertical_spacing"
                     android:text="pictureTime"

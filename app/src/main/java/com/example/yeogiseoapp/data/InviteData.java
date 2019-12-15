@@ -4,20 +4,20 @@ import com.google.gson.annotations.SerializedName;
 
 public class InviteData {
     @SerializedName("groupID")
-    private String groupID;
+    private int groupID;
     @SerializedName("userID")
-    private String userID;
+    private int userID;
 
-    public InviteData(String gid, String uid) {
+    public InviteData(int gid, int uid) {
         groupID = gid;
         userID = uid;
     }
 
-    public String getGroupID() {
+    public int getGroupID() {
         return groupID;
     }
 
-    public String getUserID() {
+    public int getUserID() {
         return userID;
     }
 }

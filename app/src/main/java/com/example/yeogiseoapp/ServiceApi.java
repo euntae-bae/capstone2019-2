@@ -2,6 +2,8 @@ package com.example.yeogiseoapp;
 
 import com.example.yeogiseoapp.data.FindUserData;
 import com.example.yeogiseoapp.data.FindUserResponse;
+import com.example.yeogiseoapp.data.GetPhotoInfoData;
+import com.example.yeogiseoapp.data.GetPhotoInfoResponse;
 import com.example.yeogiseoapp.data.GroupData;
 import com.example.yeogiseoapp.data.GroupMemberListData;
 import com.example.yeogiseoapp.data.GroupMemberListResponse;
@@ -22,13 +24,14 @@ import com.example.yeogiseoapp.data.ExitGroupData;
 import com.example.yeogiseoapp.data.ExitGroupResponse;
 import com.example.yeogiseoapp.data.RemoveGroupData;
 import com.example.yeogiseoapp.data.RemoveGroupResponse;
+import com.example.yeogiseoapp.data.RemoveImageData;
+import com.example.yeogiseoapp.data.RemoveImageResponse;
 import com.example.yeogiseoapp.data.ScheduleData;
 import com.example.yeogiseoapp.data.ScheduleResponse;
 
 import java.util.List;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -76,5 +79,12 @@ public interface ServiceApi {
 
     @POST("/schedule")
     Call<ScheduleResponse> getSchedule(@Body ScheduleData data);
+
+    @POST("/get-image-info")
+    Call<GetPhotoInfoResponse> getPhotoInfo(@Body GetPhotoInfoData data);
+
+    @POST("/remove-image")
+    Call<RemoveImageResponse> removeImage(@Body RemoveImageData data);
+
 
 }

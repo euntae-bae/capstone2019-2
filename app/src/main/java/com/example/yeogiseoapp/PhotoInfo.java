@@ -21,17 +21,18 @@ public class PhotoInfo {
     int id;
     String server_pathname = null;
     String name = "name";
-    int schedule_id;
     long time;
     float latitude;
     float longitude;
     int orientation;
+    int groupID;
+    int userID;
     String comment = "comment";
+    int order_in_group;
 
     PhotoInfo(){
         uri = null;
         id = -1;
-        time = -1;
         latitude = -1;
         longitude = -1;
         orientation = 0;
@@ -40,27 +41,23 @@ public class PhotoInfo {
     PhotoInfo(Uri u){
         uri = u;
         id = -1;
-        time = -1;
         latitude = -1;
         longitude = -1;
         orientation = 0;
     }
-    PhotoInfo(Uri u, long t, float la, float lo){
+    PhotoInfo(Uri u, float la, float lo){
         uri = u;
-        time = t;
         latitude = la;
         longitude = lo;
     }
 
     PhotoInfo(Uri u, String t, String la, String lo){
         uri = u;
-        time = convertToTime(t);
         latitude = convertToDegree(la);
         longitude = convertToDegree(lo);
     }
     public void setInfo(Uri u, long t, float la, float lo, int or){
         uri = u;
-        time = t;
         latitude = la;
         longitude = lo;
         orientation = or;
@@ -68,7 +65,6 @@ public class PhotoInfo {
 
     public void setInfo(Uri u, String t, String la, String lo, int or){
         uri = u;
-        time = convertToTime(t);
         latitude = convertToDegree(la);
         longitude = convertToDegree(lo);
         orientation = or;
@@ -78,12 +74,8 @@ public class PhotoInfo {
         uri = u;
     }
 
-    public void setTime(long t){
-        time = t;
-    }
-    public void setTime(String t){
-        time = convertToTime(t);
-    }
+    public void setTime(String s) { time = convertToTime(s); }
+    public void setTime(long l) { time = l; }
 
     public void setLatitude(float l){
         latitude = l;
@@ -131,15 +123,9 @@ public class PhotoInfo {
     };
 
     private long convertToTime(String stringDMS){
-        long result = 0;
-        String strRes = "";
-        for(int i=0; i<stringDMS.length(); i++){
-            if(stringDMS.charAt(i) != ':' && stringDMS.charAt(i) != ' ')
-                strRes += stringDMS.charAt(i);
-        }
-        result = Long.parseLong(strRes);
 
-        return result;
+        stringDMS = stringDMS.replaceAll("[^0-9]", "");
+        return Long.parseLong(stringDMS);
     };
 
     public Bitmap getRotatedBitmap(Context con, int width, int height){

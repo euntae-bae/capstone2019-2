@@ -13,7 +13,6 @@ public class ScheduleResponse {
     private int count;
     @SerializedName("list")
     private ArrayList<Object> list = new ArrayList<>();
-    private ArrayList<String> imgList = new ArrayList<>();
 
     public int getCode() {
         return code;
@@ -22,9 +21,13 @@ public class ScheduleResponse {
     public int getCount() {
         return count;
     }
-    public ArrayList<Object> getList() { return list; }
 
-    public Object getObj(int i){ return list.get(i); }
+    public int getListIndexScheduleId(int i){
+        String temp =  list.get(i).toString();
+        int oStart = temp.indexOf("scheduleID=")+11;
+        int oEnd = temp.indexOf(", latitude=");
+        return Math.round(Float.parseFloat(temp.substring(oStart, oEnd)));
+    }
 
     public float getListIndexLongitude(int i){
         String temp =  list.get(i).toString();
@@ -40,7 +43,7 @@ public class ScheduleResponse {
         return Float.parseFloat(temp.substring(aStart, aEnd));
     }
 
-    public long getListIndexTime(int i){
+    public long getListIndexTimeLong(int i){
         String temp =  list.get(i).toString();
         int tStart = temp.indexOf("dateAndTime=") + 12;
         int tEnd = temp.indexOf(", imageList=");
@@ -48,12 +51,26 @@ public class ScheduleResponse {
         return Long.parseLong(temp);
     }
 
-    public long getListIndexImgList(int i){
+    public String getListIndexTimeString(int i){
         String temp =  list.get(i).toString();
-        int tStart = temp.indexOf("imageList=") + 10;
+        int tStart = temp.indexOf("dateAndTime=") + 12;
+        int tEnd = temp.indexOf(", imageList=");
+        temp = temp.substring(tStart, tEnd);
+        return temp;
+    }
+
+    public ArrayList<Integer> getImgList(int i){
+        String temp = list.get(i).toString();
+        String[] h;
+        ArrayList<Integer> imgList = new ArrayList<>();
+        int tStart = temp.indexOf("imageList=,") + 11;
         int tEnd = temp.indexOf("}");
-        temp = temp.substring(tStart, tEnd).replaceAll("[- :TZ.]", "");
-        return Long.parseLong(temp);
+        temp = temp.substring(tStart, tEnd);
+        h = temp.split(",");
+        for(int j=0; j<h.length; j++) {
+            imgList.add(Integer.parseInt(h[j]));
+        }
+        return imgList;
     }
 
 

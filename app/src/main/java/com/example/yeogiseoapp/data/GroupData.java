@@ -4,16 +4,16 @@ import com.google.gson.annotations.SerializedName;
 
 public class GroupData {
     @SerializedName("userID")
-    private String userID;
+    private int userID;
     @SerializedName("groupName")
     private String groupName;
 
-    public GroupData(String uid, String gname) {
+    public GroupData(int uid, String gname) {
         userID = uid;
         groupName = gname;
     }
 
-    public String getUserID() {
+    public int getUserID() {
         return userID;
     }
 
