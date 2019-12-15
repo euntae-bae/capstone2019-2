@@ -23,11 +23,12 @@ public class PhotoInfo {
     long time;
     float latitude;
     float longitude;
-    int orientation;
+    int orientation = 0;
     int groupID;
     int userID;
     String comment = "comment";
     int order_in_group;
+    Bitmap from_server_bitmap;
 
     PhotoInfo(){
         uri = null;

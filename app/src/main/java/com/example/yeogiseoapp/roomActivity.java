@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.material.navigation.NavigationView;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,6 +72,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
+import org.w3c.dom.Text;
+
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -98,6 +103,14 @@ public class roomActivity extends AppCompatActivity
     // 0 : No, 1 : Yes, 2 : Host
     int chkDrawstatus, gid, id, tempUid;
     public Paper paper;
+    DrawerLayout drawer;
+    ImageView picImgView;
+    TextView picTimeTextView;
+    TextView picLatitudeTextView;
+    TextView picLongitudeTextView;
+    TextView picCommentTextView;
+    TextView picIdTextView;
+    TextView picPathTextView;
 
 
     @Override
@@ -140,6 +153,16 @@ public class roomActivity extends AppCompatActivity
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
         navigationView.setNavigationItemSelectedListener(this);
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        picImgView = (ImageView)findViewById(R.id.picBodyImage);
+        picTimeTextView = (TextView) findViewById(R.id.pictureTime);
+        picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
+        picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
+        picCommentTextView = (TextView) findViewById(R.id.pictureComment);
+        picIdTextView = (TextView) findViewById(R.id.pictureId);
+        picPathTextView = (TextView) findViewById(R.id.picturePath);
+
 
         //File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/tempImage");
         File dir = new File("/storage/emulated/0/Yeogiseo//tempImage");
@@ -358,14 +381,47 @@ public class roomActivity extends AppCompatActivity
     public void makeMarkerByScheduleList(boolean isUri){
         Bitmap pic;
         for(int i=0; i<scheduleInfoArrayList.size(); i++){
-            if(isUri)
-                pic = photoInfoList.get(scheduleInfoArrayList.get(i).imageList.get(0)-1).getRotatedBitmap(this, 130, 87);
+            if(isUri) {
+                ImageView iv = findViewById(R.id.picBodyImage);
+                int iid = -1;
+                for(int j=0; j<photoInfoList.size(); j++){
+                    for(int k=0; k<scheduleInfoArrayList.get(i).imageList.size(); k++){
+                        if(scheduleInfoArrayList.get(i).imageList.get(k) == photoInfoList.get(j).id){
+                            iid = j;
+                            break;
+                        }
+                    }
+                    if(iid != -1)
+                        break;
+                }
+
+                DownloadImageTask dt = new DownloadImageTask(iv);
+                dt.execute(photoInfoList.get(iid).server_pathname);
+                pic = dt.getBitmap();
+            }
             else
                 pic = BitmapFactory.decodeResource(getResources(), R.drawable.ic_menu_camera);
             if(scheduleInfoArrayList.get(i).longitude != -1 && scheduleInfoArrayList.get(i).latitude != -1)
                 mf.makeMarker(scheduleInfoArrayList.get(i).latitude, scheduleInfoArrayList.get(i).longitude, pic);
         }
         mf.drawPath();
+    }
+
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = 1280;
+        int height = 720;
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
     }
 
     private RequestBody createPart(int descString){
@@ -455,15 +511,6 @@ public class roomActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         //mf.moveCamera(mf.markers.get(n-1));
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ImageView picImgView = (ImageView)findViewById(R.id.picBodyImage);
-        TextView picTimeTextView = (TextView) findViewById(R.id.pictureTime);
-        TextView picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
-        TextView picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
-        TextView picCommentTextView = (TextView) findViewById(R.id.pictureComment);
-        TextView picIdTextView = (TextView) findViewById(R.id.pictureId);
-
         int n = 0;
         for(int i=0; i<photoInfoList.size(); i++){
             if(photoInfoList.get(i).id == id) {
@@ -472,11 +519,13 @@ public class roomActivity extends AppCompatActivity
             }
         }
         picImgView.setImageBitmap(photoInfoList.get(n).getRotatedBitmap(this, dpToPx(this, 100), dpToPx(this, 80)));
-        picIdTextView.setText("ID : "+photoInfoList.get(n).id);
+        picIdTextView.setText(String.valueOf(photoInfoList.get(n).id));
         picTimeTextView.setText("Time : "+String.valueOf(photoInfoList.get(n).time));
         picLatitudeTextView.setText("Latitude : "+String.valueOf(photoInfoList.get(n).latitude));
         picLongitudeTextView.setText("Longitude : "+String.valueOf(photoInfoList.get(n).longitude));
         picCommentTextView.setText("Comment : "+photoInfoList.get(n).comment);
+        picPathTextView.setText("Path : "+photoInfoList.get(n).server_pathname);
+        new DownloadImageTask(picImgView).execute(photoInfoList.get(n).server_pathname);
 
         return true;
     }
@@ -578,10 +627,11 @@ public class roomActivity extends AppCompatActivity
     public void mPicinfoOnClick(View v) {
         switch (v.getId()) {
             case R.id.picinfoSaveBtn:
+                setComment(new CommentData(Integer.parseInt(picIdTextView.getText().toString()), picPathTextView.getText().toString().substring(7), id, username, picCommentTextView.getText().toString().substring(10)));
                 break;
 
             case R.id.picinfoDeleteBtn:
-                int picId = Integer.parseInt(((TextView)findViewById(R.id.pictureId)).getText().toString().substring(5));
+                int picId = Integer.parseInt(((TextView)findViewById(R.id.pictureId)).getText().toString());
                 removeImage(new RemoveImageData(picId));
                 break;
         }
@@ -799,9 +849,11 @@ public class roomActivity extends AppCompatActivity
                         p.order_in_group = i;
                         photoInfoList.add(p);
                     }
-                    makeMarkerByScheduleList(false);
+                    makeMarkerByScheduleList(true);
                     navigationView.getMenu().clear();
                     makeNavigationMenuUsingPhotos();
+                    showToast("일정 업데이트 완료");
+
                 }
             }
             @Override
@@ -822,6 +874,8 @@ public class roomActivity extends AppCompatActivity
                 if (code == 201) {
                     showToast(message);
                     initSchedule(new ScheduleData(gid));
+                    navigationView.getMenu().close();
+
                 }
             }
             @Override
@@ -880,90 +934,35 @@ public class roomActivity extends AppCompatActivity
     }
 
 
-    private class ImageDownload extends AsyncTask<String, Void, Void> {
 
-        /**
-         * 파일명
-         */
-        private String fileName;
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+        Bitmap b;
 
-        /**
-         * 저장할 폴더
-         */
-        private final String SAVE_FOLDER = "/yeogiseo/save_folder";
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            //다운로드 경로를 지정
-            String savePath = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
-
-            File dir = new File(savePath);
-
-            //상위 디렉토리가 존재하지 않을 경우 생성
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            //파일 이름 :날짜_시간
-            Date day = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
-            fileName = String.valueOf(sdf.format(day));
-
-            //웹 서버 쪽 파일이 있는 경로
-            String fileUrl = params[0];
-
-            //다운로드 폴더에 동일한 파일명이 존재하는지 확인
-            if (new File(savePath + "/" + fileName).exists() == false) {
-            } else {
-            }
-
-            String localPath = savePath + "/" + fileName + ".jpg";
-
-            try {
-                URL imgUrl = new URL(fileUrl);
-                //서버와 접속하는 클라이언트 객체 생성
-                HttpURLConnection conn = (HttpURLConnection)imgUrl.openConnection();
-                int len = conn.getContentLength();
-                byte[] tmpByte = new byte[len];
-                //입력 스트림을 구한다
-                InputStream is = conn.getInputStream();
-                File file = new File(localPath);
-                //파일 저장 스트림 생성
-                FileOutputStream fos = new FileOutputStream(file);
-                int read;
-                //입력 스트림을 파일로 저장
-                for (;;) {
-                    read = is.read(tmpByte);
-                    if (read <= 0) {
-                        break;
-                    }
-                    fos.write(tmpByte, 0, read); //file 생성
-                }
-                is.close();
-                fos.close();
-                conn.disconnect();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return null;
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = "http://54.180.107.241:3002/view/" + urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+                b = mIcon11;
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
 
-            //저장한 이미지 열기
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            String targetDir = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
-            File file = new File(targetDir + "/" + fileName + ".jpg");
-            //type 지정 (이미지)
-            i.setDataAndType(Uri.fromFile(file), "image/*");
-            getApplicationContext().startActivity(i);
-            //이미지 스캔해서 갤러리 업데이트
-            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
+
+        public Bitmap getBitmap(){
+            return b;
         }
     }
 
