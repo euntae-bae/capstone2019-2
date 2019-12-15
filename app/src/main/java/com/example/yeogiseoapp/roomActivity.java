@@ -916,7 +916,7 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
-    private void getLandMark(final LandMarkData pathname) {
+    public void getLandMark(final LandMarkData pathname) {
         service.getLandMark(pathname).enqueue(new Callback<LandMarkResponse>() {
             @Override
             public void onResponse(Call<LandMarkResponse> call, Response<LandMarkResponse> response) {

@@ -77,7 +77,7 @@ public interface ServiceApi {
             @Part("description") RequestBody desc,
             @Part List<MultipartBody.Part> files
             );
-    @GET("/api")
+    @POST("/api")
     Call<LandMarkResponse> getLandMark(@Body LandMarkData path);
 
     @POST("/schedule")
