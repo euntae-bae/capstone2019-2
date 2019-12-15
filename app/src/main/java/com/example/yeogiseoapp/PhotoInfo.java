@@ -64,6 +64,7 @@ public class PhotoInfo {
 
     public void setInfo(Uri u, String t, String la, String lo, int or){
         uri = u;
+        time = convertToTime(t);
         latitude = convertToDegree(la);
         longitude = convertToDegree(lo);
         orientation = or;
