@@ -1,5 +1,7 @@
 package com.example.yeogiseoapp;
 
+import com.example.yeogiseoapp.data.CommentData;
+import com.example.yeogiseoapp.data.CommentResponse;
 import com.example.yeogiseoapp.data.FindUserData;
 import com.example.yeogiseoapp.data.FindUserResponse;
 import com.example.yeogiseoapp.data.GetPhotoInfoData;
@@ -86,5 +88,6 @@ public interface ServiceApi {
     @POST("/remove-image")
     Call<RemoveImageResponse> removeImage(@Body RemoveImageData data);
 
-
+    @POST("/comment")
+    Call<CommentResponse> comment(@Body CommentData data);
 }

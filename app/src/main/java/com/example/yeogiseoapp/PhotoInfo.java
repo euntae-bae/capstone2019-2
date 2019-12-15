@@ -20,7 +20,6 @@ public class PhotoInfo {
     Uri uri;
     int id;
     String server_pathname = null;
-    String name = "name";
     long time;
     float latitude;
     float longitude;

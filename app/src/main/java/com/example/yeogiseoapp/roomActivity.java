@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -22,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.yeogiseoapp.data.CommentData;
+import com.example.yeogiseoapp.data.CommentResponse;
 import com.example.yeogiseoapp.data.ExifData;
 import com.example.yeogiseoapp.data.ExifUploadResponse;
 import com.example.yeogiseoapp.data.ExitGroupData;
@@ -49,9 +52,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -450,7 +458,6 @@ public class roomActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ImageView picImgView = (ImageView)findViewById(R.id.picBodyImage);
-        TextView picNameTextView = (TextView) findViewById(R.id.pictureName);
         TextView picTimeTextView = (TextView) findViewById(R.id.pictureTime);
         TextView picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
         TextView picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
@@ -465,7 +472,6 @@ public class roomActivity extends AppCompatActivity
             }
         }
         picImgView.setImageBitmap(photoInfoList.get(n).getRotatedBitmap(this, dpToPx(this, 100), dpToPx(this, 80)));
-        picNameTextView.setText(photoInfoList.get(n).name);
         picIdTextView.setText("ID : "+photoInfoList.get(n).id);
         picTimeTextView.setText("Time : "+String.valueOf(photoInfoList.get(n).time));
         picLatitudeTextView.setText("Latitude : "+String.valueOf(photoInfoList.get(n).latitude));
@@ -826,6 +832,25 @@ public class roomActivity extends AppCompatActivity
         });
     }
 
+    public void setComment(final CommentData data) {
+        service.comment(data).enqueue(new Callback<CommentResponse>() {
+            @Override
+            public void onResponse(Call<CommentResponse> call, Response<CommentResponse> response) {
+                CommentResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+                if (code == 201) {
+                    showToast(message);
+                }
+            }
+            @Override
+            public void onFailure(Call<CommentResponse> call, Throwable t) {
+                Toast.makeText(roomActivity.this, "코멘트 업로드 과정 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("코멘트 업로드 과정 오류 발생", t.getMessage());
+            }
+        });
+    }
+
 
     public void setTempUid(int uid){ tempUid = uid; }
 
@@ -853,4 +878,93 @@ public class roomActivity extends AppCompatActivity
 
         return px/density;
     }
+
+
+    private class ImageDownload extends AsyncTask<String, Void, Void> {
+
+        /**
+         * 파일명
+         */
+        private String fileName;
+
+        /**
+         * 저장할 폴더
+         */
+        private final String SAVE_FOLDER = "/yeogiseo/save_folder";
+
+        @Override
+        protected Void doInBackground(String... params) {
+
+            //다운로드 경로를 지정
+            String savePath = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
+
+            File dir = new File(savePath);
+
+            //상위 디렉토리가 존재하지 않을 경우 생성
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            //파일 이름 :날짜_시간
+            Date day = new Date();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
+            fileName = String.valueOf(sdf.format(day));
+
+            //웹 서버 쪽 파일이 있는 경로
+            String fileUrl = params[0];
+
+            //다운로드 폴더에 동일한 파일명이 존재하는지 확인
+            if (new File(savePath + "/" + fileName).exists() == false) {
+            } else {
+            }
+
+            String localPath = savePath + "/" + fileName + ".jpg";
+
+            try {
+                URL imgUrl = new URL(fileUrl);
+                //서버와 접속하는 클라이언트 객체 생성
+                HttpURLConnection conn = (HttpURLConnection)imgUrl.openConnection();
+                int len = conn.getContentLength();
+                byte[] tmpByte = new byte[len];
+                //입력 스트림을 구한다
+                InputStream is = conn.getInputStream();
+                File file = new File(localPath);
+                //파일 저장 스트림 생성
+                FileOutputStream fos = new FileOutputStream(file);
+                int read;
+                //입력 스트림을 파일로 저장
+                for (;;) {
+                    read = is.read(tmpByte);
+                    if (read <= 0) {
+                        break;
+                    }
+                    fos.write(tmpByte, 0, read); //file 생성
+                }
+                is.close();
+                fos.close();
+                conn.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+
+            //저장한 이미지 열기
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            String targetDir = Environment.getExternalStorageDirectory().toString() + SAVE_FOLDER;
+            File file = new File(targetDir + "/" + fileName + ".jpg");
+            //type 지정 (이미지)
+            i.setDataAndType(Uri.fromFile(file), "image/*");
+            getApplicationContext().startActivity(i);
+            //이미지 스캔해서 갤러리 업데이트
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+        }
+    }
+
 }
