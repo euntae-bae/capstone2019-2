@@ -6,12 +6,18 @@ import com.google.gson.annotations.SerializedName;
 public class RemoveImageData {
     @SerializedName("imageID")
     private int imgaeID;
+    @SerializedName("groupID")
+    private int gid;
 
-    public RemoveImageData(int iid) {
+    public RemoveImageData(int iid, int gd) {
         imgaeID = iid;
+        gid = gd;
     }
 
     public int getImgaeID() {
         return imgaeID;
+    }
+    public int getGid() {
+        return gid;
     }
 }

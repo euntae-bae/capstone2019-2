@@ -36,6 +36,7 @@ public class mapFragment extends Fragment
     private GoogleMap mMap;
     ArrayList<Polyline> polylines = new ArrayList<Polyline>();
     ArrayList<LatLng> markers = new ArrayList<LatLng>();
+    ArrayList<Marker> markerArrayList = new ArrayList<>();
     Button allowBtn;
 
     public mapFragment()
@@ -150,13 +151,14 @@ public class mapFragment extends Fragment
         else
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
-        mMap.addMarker(markerOptions);
+        Marker m = mMap.addMarker(markerOptions);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(pic));
 
         mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
 
         markers.add(pic);
+        markerArrayList.add(m);
     }
 
     public void drawPath(){        //polyline을 그려주는 메소드
@@ -167,7 +169,7 @@ public class mapFragment extends Fragment
             end = markers.get(i);
             PolylineOptions options = new PolylineOptions().add(start).add(end).width(15).color(Color.BLACK).geodesic(true);
             polylines.add(mMap.addPolyline(options));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(start, 11));
         }
     }
 
@@ -175,6 +177,12 @@ public class mapFragment extends Fragment
         for(Polyline line : polylines)
             line.remove();
         polylines.clear();
+    }
+
+    public void removeMarkers(){
+        for(Marker options : markerArrayList)
+            options.remove();
+        markerArrayList.clear();
     }
 
     public void moveCamera(LatLng dest, float zoom){

@@ -1,6 +1,7 @@
 package com.example.yeogiseoapp;
 
 import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,6 +14,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.TypedValue;
@@ -20,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +38,7 @@ import com.example.yeogiseoapp.data.FindUserData;
 import com.example.yeogiseoapp.data.FindUserResponse;
 import com.example.yeogiseoapp.data.GetPhotoInfoData;
 import com.example.yeogiseoapp.data.GetPhotoInfoResponse;
+import com.example.yeogiseoapp.data.GroupInquiryData;
 import com.example.yeogiseoapp.data.GroupMemberListData;
 import com.example.yeogiseoapp.data.GroupMemberListResponse;
 import com.example.yeogiseoapp.data.ImageUploadResponse;
@@ -116,9 +121,11 @@ public class roomActivity extends AppCompatActivity
     TextView picTimeTextView;
     TextView picLatitudeTextView;
     TextView picLongitudeTextView;
-    TextView picCommentTextView;
+    EditText picCommentTextView;
     TextView picIdTextView;
     TextView picPathTextView;
+    Handler timerHandler;
+    final static int repeat_delay = 3000;
 
 
     @Override
@@ -141,7 +148,7 @@ public class roomActivity extends AppCompatActivity
         service = RetrofitClient.getInstance().create(ServiceApi.class);
 
         cf.initChat();
-
+        init();
         Toast.makeText(getApplicationContext(), room+"입니다", Toast.LENGTH_SHORT).show();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -167,15 +174,15 @@ public class roomActivity extends AppCompatActivity
         picTimeTextView = (TextView) findViewById(R.id.pictureTime);
         picLatitudeTextView = (TextView) findViewById(R.id.pictureLatitude);
         picLongitudeTextView = (TextView) findViewById(R.id.pictureLongitude);
-        picCommentTextView = (TextView) findViewById(R.id.pictureComment);
+        picCommentTextView = (EditText) findViewById(R.id.pictureComment);
         picIdTextView = (TextView) findViewById(R.id.pictureId);
         picPathTextView = (TextView) findViewById(R.id.picturePath);
-
 
         //File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/tempImage");
         File dir = new File("/storage/emulated/0/Yeogiseo//tempImage");
         if(!dir.exists()) dir.mkdirs();
 
+        //timerHandler.sendEmptyMessage(0);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -201,8 +208,8 @@ public class roomActivity extends AppCompatActivity
             case R.id.action_list:
                 groupMemberList(new GroupMemberListData(gid), true);
                 return true;
-            case R.id.action_settings:
-                Toast.makeText(this, "Setting", Toast.LENGTH_SHORT).show();
+            case R.id.action_refresh:
+                initSchedule(new ScheduleData(gid));
                 return true;
             case R.id.action_exit:
                 openExitPopup();
@@ -343,6 +350,7 @@ public class roomActivity extends AppCompatActivity
                     @Override
                     public void onResponse(Call<ImageUploadResponse> call, Response<ImageUploadResponse> response) {
                         Toast.makeText(roomActivity.this,"업로드 성공",Toast.LENGTH_SHORT).show();
+                        initSchedule(new ScheduleData(gid));
                     }
 
                     @Override
@@ -351,10 +359,6 @@ public class roomActivity extends AppCompatActivity
                         Log.e("이미지 전송 오류 발생", t.getMessage());
                     }
                 });
-
-
-                // 맵에 마커 찍는 부분
-                initSchedule(new ScheduleData(gid));
 
             } catch (IOException e) {
                 // Handle any errors
@@ -370,7 +374,18 @@ public class roomActivity extends AppCompatActivity
     public void makeNavigationMenuUsingPhotos(){
         for(int i=0; i<photoInfoList.size(); i++){
             Drawable drawable = getDrawable(R.drawable.ic_menu_camera);
-            navigationView.getMenu().add(Menu.NONE, photoInfoList.get(i).id, Menu.NONE, "Picture"+(i+1)).setIcon(drawable);
+            boolean update = true;
+            for(int j=0; j<scheduleInfoArrayList.size(); j++){
+                for(int k=0;k<scheduleInfoArrayList.get(j).imageList.size();k++){
+                    if(scheduleInfoArrayList.get(j).imageList.get(k) == photoInfoList.get(i).id){
+                        navigationView.getMenu().add(Menu.NONE, photoInfoList.get(i).id, Menu.NONE, "Sch"+(j+1)+"Pic"+(k+1)).setIcon(drawable);
+                        update = false;
+                        break;
+                    }
+                }
+                if(!update) break;
+            }
+
         }
     }
 
@@ -378,6 +393,7 @@ public class roomActivity extends AppCompatActivity
     // 서버에서 받아온 일정 정보로 구글맵 위에 해당 경로를 띄워주는 함수이다.
     public void makeMarkerByScheduleList(boolean isUri){
         Bitmap pic;
+        mf.removeMarkers();
         for(int i=0; i<scheduleInfoArrayList.size(); i++){
             if(isUri) {
                 ImageView iv = findViewById(R.id.picBodyImage);
@@ -426,11 +442,13 @@ public class roomActivity extends AppCompatActivity
         int shortSize = Math.min(imgHeight,imgWidth);
 
         //크기에 따른 비율 설정
-        if(shortSize>2880){
+        if(shortSize>3840){
+            wantedSize = 8;
+        }else if(shortSize>1920){
             wantedSize = 4;
-        }else if(shortSize>1440){
+        }else if(shortSize>960){
             wantedSize = 2;
-        }else {
+        }else{
             wantedSize = 1;
         }
 
@@ -447,7 +465,7 @@ public class roomActivity extends AppCompatActivity
         try {
             Log.e("just in try","1");
             OutputStream os = new FileOutputStream(modedFile);
-            source.compress(Bitmap.CompressFormat.JPEG,100,os);
+            source.compress(Bitmap.CompressFormat.JPEG,90,os);
             Log.d("before create","yes");
             requestFile = RequestBody.create(MediaType.parse("image/*"),modedFile);
             os.flush();
@@ -510,6 +528,8 @@ public class roomActivity extends AppCompatActivity
         picCommentTextView.setText("Comment : "+photoInfoList.get(n).comment);
         picPathTextView.setText("Path : "+photoInfoList.get(n).server_pathname);
         new DownloadImageTask(picImgView).execute(photoInfoList.get(n).server_pathname);
+
+        mf.moveCamera(new LatLng(photoInfoList.get(n).latitude, photoInfoList.get(n).longitude), 15);
 
         return true;
     }
@@ -626,12 +646,12 @@ public class roomActivity extends AppCompatActivity
     public void mPicinfoOnClick(View v) {
         switch (v.getId()) {
             case R.id.picinfoSaveBtn:
-                setComment(new CommentData(Integer.parseInt(picIdTextView.getText().toString()), picPathTextView.getText().toString().substring(7), id, username, picCommentTextView.getText().toString().substring(10)));
+                setComment(new CommentData(Integer.parseInt(picIdTextView.getText().toString()), picPathTextView.getText().toString().substring(7), id, username, picCommentTextView.getText().toString()));
                 break;
 
             case R.id.picinfoDeleteBtn:
                 int picId = Integer.parseInt(((TextView)findViewById(R.id.pictureId)).getText().toString());
-                removeImage(new RemoveImageData(picId));
+                removeImage(new RemoveImageData(picId, gid));
                 break;
 
 
@@ -849,6 +869,7 @@ public class roomActivity extends AppCompatActivity
                 int code = result.getCode();
                 String message = result.getMessage();
                 if (code == 201) {
+
                     photoInfoList.clear();
                     for(int i=0; i<result.getSize(); i++) {
                         PhotoInfo p = new PhotoInfo();
@@ -865,7 +886,6 @@ public class roomActivity extends AppCompatActivity
                     makeMarkerByScheduleList(true);
                     navigationView.getMenu().clear();
                     makeNavigationMenuUsingPhotos();
-                    showToast("일정 업데이트 완료");
 
                 }
             }
@@ -889,7 +909,6 @@ public class roomActivity extends AppCompatActivity
                     showToast(message);
                     initSchedule(new ScheduleData(gid));
                     navigationView.getMenu().close();
-
                 }
             }
             @Override
@@ -909,6 +928,15 @@ public class roomActivity extends AppCompatActivity
                 int code = result.getCode();
                 String message = result.getMessage();
                 if (code == 201) {
+                    try {
+                        Uri posturi = Uri.parse("http://ec2-54-180-107-241.ap-northeast-2.compute.amazonaws.com:3002/post/"+result.getPostID());
+                        ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        ClipData clipData = ClipData.newPlainText("label", posturi.toString());
+                        clipboardManager.setPrimaryClip(clipData);
+                        Toast.makeText(getApplication(), "복사되었습니다.",Toast.LENGTH_LONG).show();
+                    }catch (Error e){
+                        Log.e("comment error",e.getLocalizedMessage());
+                    }
                     showToast(message);
                 }
             }
@@ -1010,6 +1038,16 @@ public class roomActivity extends AppCompatActivity
         public Bitmap getBitmap(){
             return b;
         }
+    }
+
+    private void init() {
+        timerHandler = new Handler(){
+            public void handleMessage(Message msg){
+                super.handleMessage(msg);
+                initSchedule(new ScheduleData(gid));
+                this.sendEmptyMessageDelayed(0, repeat_delay);
+            }
+        };
     }
 
 }

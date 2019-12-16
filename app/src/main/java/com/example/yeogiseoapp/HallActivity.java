@@ -20,6 +20,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +32,8 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,6 +53,8 @@ public class HallActivity extends AppCompatActivity {
     private ServiceApi service = null;
     EditText groupName;
     public makegroupPopupFragment mf;
+    Handler timerHandler;
+    final static int repeat_delay = 3000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +71,10 @@ public class HallActivity extends AppCompatActivity {
         username = sp.getString("loggedinUsername", null);
         uid = Integer.parseInt(sp.getString("loggedinId", null));
         ListView listview;
-        inquiryGroup(new GroupInquiryData(uid));
+        inquiryGroup(new GroupInquiryData(uid), true);
 
         checkPermission();
+        init();
 
         adapter = new GroupAdapter();
         listview = (ListView)findViewById(R.id.listview);
@@ -93,14 +101,46 @@ public class HallActivity extends AppCompatActivity {
                 intent.putExtra("info", info);
                 intent.putExtra("gid", gid);
                 intent.putExtra("id", uid);
+                timerHandler.removeMessages(0);
                 startActivity(intent);
+            }
+        });
 
+        timerHandler.sendEmptyMessage(0);
+    }
+
+    // 그룹 조회를 위한 서버와의 인터페이스를 실행하는 함수이다.
+    public void inquiryGroup(final GroupInquiryData data, final boolean b) {
+        service.groupInquiry(data).enqueue(new Callback<GroupInquiryResponse>() {
+            @Override
+            public void onResponse(Call<GroupInquiryResponse> call, Response<GroupInquiryResponse> response) {
+                GroupInquiryResponse result = response.body(); // 서버에서 보낸 응답의 역직렬화된 데이터
+                int code = result.getCode();
+                String message = result.getMessage();
+                if (code == 201) {
+                    // 그룹 조회 성공
+                    int size = result.getSize();
+                        result.setGroupArr();
+                        for (int i = 0; i < size; i++) {
+                            makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i), result.getIndexGroupID(i), b);
+                        }
+                }
+                else {
+                    // 그룹 조회 실패
+                    Log.d("group making failed", message);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GroupInquiryResponse> call, Throwable t) {
+                Toast.makeText(HallActivity.this, "그룹 조회 오류 발생", Toast.LENGTH_SHORT).show();
+                Log.e("그룹 조회 오류 발생", t.getMessage());
             }
         });
     }
 
     // 그룹 조회를 위한 서버와의 인터페이스를 실행하는 함수이다.
-    public void inquiryGroup(final GroupInquiryData data) {
+    public void inquiryGroupReapeat(final GroupInquiryData data, final boolean b) {
         service.groupInquiry(data).enqueue(new Callback<GroupInquiryResponse>() {
             @Override
             public void onResponse(Call<GroupInquiryResponse> call, Response<GroupInquiryResponse> response) {
@@ -111,9 +151,24 @@ public class HallActivity extends AppCompatActivity {
                     // 그룹 조회 성공
                     int size = result.getSize();
                     result.setGroupArr();
-                    for(int i=0; i<size; i++){
-                        makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i), result.getIndexGroupID(i));
+
+                    ArrayList<GroupInfoItem> temp = adapter.getListViewItemList();
+                    boolean isUpdate = true;
+                    for (int i = 0; i < size; i++) {
+                        isUpdate = true;
+                        for(int j=0; j<temp.size(); j++)
+                        {
+                            if(result.getIndexGroupID(i) == temp.get(j).getGroupID()) {
+                                isUpdate = false;
+                                break;
+                            }
+                        }
+                        if(isUpdate){
+                            makeRoom(result.getIndexGroupName(i), result.getIndexCreator(i), result.getIndexGroupID(i), false);
+                        }
                     }
+
+
                 }
                 else {
                     // 그룹 조회 실패
@@ -137,7 +192,7 @@ public class HallActivity extends AppCompatActivity {
     }
 
     // 그룹 생성을 위한 서버와의 인터페이스를 실행하는 함수이다.
-    private void makeGroup(final GroupData data) {
+    private void makeGroup(final GroupData data, final boolean b) {
         service.groupMake(data).enqueue(new Callback<GroupResponse>() {
             @Override
             public void onResponse(Call<GroupResponse> call, Response<GroupResponse> response) {
@@ -148,7 +203,7 @@ public class HallActivity extends AppCompatActivity {
                 Toast.makeText(HallActivity.this, message, Toast.LENGTH_SHORT).show();
                 if (code == 201) {
                     // 그룹 생성 성공
-                    makeRoom(data.getGroupName(), username, groupID);
+                    makeRoom(data.getGroupName(), username, groupID, b);
                 }
                 else {
                     // 그룹 생성 실패
@@ -165,10 +220,12 @@ public class HallActivity extends AppCompatActivity {
     }
 
     // 화면에 그룹을 출력하는 함수이다.
-    public void makeRoom(String title, String creator, int gid){
+    public void makeRoom(String title, String creator, int gid, boolean alarm){
         adapter.addItem(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_launcher_foreground), title, creator, gid);
-        Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        if(alarm) {
+            Snackbar.make(layout, "방이 만들어졌습니다.", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
         adapter.notifyDataSetChanged();
     }
 
@@ -209,7 +266,7 @@ public class HallActivity extends AppCompatActivity {
         switch (v.getId()) {
             case R.id.popMakeGroupOkBtn:
                 String gn = mf.getGroupName();
-                makeGroup(new GroupData(uid, gn));
+                makeGroup(new GroupData(uid, gn), true);
                 mf.dismissDialog();
                 break;
 
@@ -219,4 +276,13 @@ public class HallActivity extends AppCompatActivity {
         }
     }
 
+    private void init() {
+        timerHandler = new Handler(){
+            public void handleMessage(Message msg){
+                super.handleMessage(msg);
+                inquiryGroupReapeat(new GroupInquiryData(uid), false);
+                this.sendEmptyMessageDelayed(0, repeat_delay);
+            }
+        };
+    }
 }

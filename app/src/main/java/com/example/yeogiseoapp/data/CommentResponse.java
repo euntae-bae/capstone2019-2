@@ -8,11 +8,17 @@ public class CommentResponse {
     private int code;
     @SerializedName("message")
     private String message;
+    @SerializedName("postID")
+    private int postID;
 
     public int getCode() {
         return code;
     }
     public String getMessage() {
         return message;
+    }
+
+    public int getPostID() {
+        return postID;
     }
 }
